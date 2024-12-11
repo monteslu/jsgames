@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Canvas with Aspect Ratio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: black; /* Black bars */
+            overflow: hidden;
+        }
+
+        canvas {
+            /* Ensure pixelated rendering */
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        window.onerror = function(message, source, lineno, colno, error) {
+        console.error(`Error occurred: ${message} at ${source}:${lineno}:${colno}`, error);
+        // Handle the error gracefully (e.g., log, show user-friendly message, etc.)
+        return true; // Prevents the default browser error handling
+    };
+
+    </script>
+    <!-- Internal aspect ratio 4:3 -->
+    <!-- <canvas id="gameCanvas" width="640" height="480"></canvas> -->
+    <!-- Internal aspect ratio 16:9 -->
+    <canvas id="game-canvas" width="320" height="240"></canvas>
+    <script>
+        const canvas = document.querySelectorAll('canvas')[0];
+        const ctx = canvas.getContext("2d");
+
+        // Disable smoothing for pixel-perfect scaling
+        ctx.imageSmoothingEnabled = false;
+
+        // Function to resize the canvas while maintaining its aspect ratio
+        function resizeCanvas() {
+            const aspectRatio = canvas.width / canvas.height;
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+
+            if (windowWidth / windowHeight > aspectRatio) {
+            // Window is wider than canvas aspect ratio => black bars on the sides
+            canvas.style.width = `${windowHeight * aspectRatio}px`;
+            canvas.style.height = `${windowHeight}px`;
+            } else {
+            // Window is taller than canvas aspect ratio => black bars on the top and bottom
+            canvas.style.width = `${windowWidth}px`;
+            canvas.style.height = `${windowWidth / aspectRatio}px`;
+            }
+        }
+
+        // Redraw the canvas on resize
+        window.addEventListener("resize", resizeCanvas);
+        resizeCanvas(); // Initial resize
+    </script>
+    <script src="./game.js" type="module"></script>
+</body>
+</html>
