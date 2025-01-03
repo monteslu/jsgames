@@ -1,3 +1,5 @@
+// simple utils for loading assets and getting input
+
 const window = globalThis;
 
 let audioContext;
@@ -12,7 +14,7 @@ export async function loadSound(url) {
   return audioBuffer;
 }
 
-export function playSound(audioBuffer) {
+export function playSound(audioBuffer, loop = false) {
   if (!audioBuffer) {
     return;
   }
@@ -23,10 +25,14 @@ export function playSound(audioBuffer) {
   bufferSource.buffer = audioBuffer;
   
   bufferSource.connect(audioContext.destination);
+  if (loop) {
+    bufferSource.loop = true;
+  }
   bufferSource.start();
   bufferSource.onended = () => {
     bufferSource.disconnect();
   };
+  return bufferSource;
 }
 
 // loads image from a url as a promise
@@ -74,10 +80,10 @@ export function getInput() {
         DPAD_DOWN: gp.buttons[13],
         DPAD_LEFT: gp.buttons[14],
         DPAD_RIGHT: gp.buttons[15],
-        BUTTON_SOUTH: gp.buttons[0],
-        BUTTON_EAST: gp.buttons[1],
-        BUTTON_WEST: gp.buttons[2],
-        BUTTON_NORTH: gp.buttons[3],
+        BUTTON_SOUTH: gp.buttons[0], // A on xbox, B on nintendo
+        BUTTON_EAST: gp.buttons[1], // B on xbox, A on nintendo
+        BUTTON_WEST: gp.buttons[2], // X on xbox, Y on nintendo
+        BUTTON_NORTH: gp.buttons[3], // Y on xbox, X on nintendo
         LEFT_SHOULDER: gp.buttons[4] || getDefaultBtn(),
         RIGHT_SHOULDER: gp.buttons[5] || getDefaultBtn(),
         LEFT_TRIGGER: gp.buttons[6] || getDefaultBtn(),
