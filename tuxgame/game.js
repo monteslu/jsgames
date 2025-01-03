@@ -13,15 +13,21 @@ const { requestAnimationFrame, localStorage } = globalThis;
 console.log('requestAnimationFrame def1', requestAnimationFrame);
 
 
-// const loadImage = (url) => {
-//   return new Promise((resolve, reject) => {
-//     const img = new Image();
-//     img.onload = (loaded) => {
-//       resolve(loaded);
-//     };
-//     img.src = url;
-//   });
-// }
+const loadImage2 = (url) => {
+  console.log('loadImage2', url);
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = (loaded) => {
+      console.log('img loaded', loaded);
+      resolve(loaded);
+    };
+    img.onerror = (error) => {
+      console.error('img error', error);
+      reject(error);
+    };
+    img.src = url;
+  });
+}
 
 let axs = [];
 
@@ -104,17 +110,21 @@ function gameLoop() {
 }
 
 async function launch() {
-  console.log('start');
-  tuxImg = await loadImage('./tux64.png');
-  console.log('tuxImg', tuxImg);
-  jsImg = await loadImage('/js64.png');
-  console.log('jsImg', jsImg);
-  console.log('localStorage', localStorage);
-  localStorage.clear();
-  // console.log('localstorage.foo', localStorage.foo);
-  localStorage.foo = 'bar22';
-  console.log('localstorage.foo', localStorage.foo);
-  gameLoop();
+  try {
+    console.log('start');
+    tuxImg = await loadImage2('./tux64.png');
+    console.log('tuxImg', tuxImg);
+    jsImg = await loadImage2('/js64.png');
+    console.log('jsImg', jsImg);
+    console.log('localStorage', localStorage);
+    localStorage.clear();
+    // console.log('localstorage.foo', localStorage.foo);
+    localStorage.foo = 'bar22';
+    console.log('localstorage.foo', localStorage.foo);
+    gameLoop();
+  } catch (e) {
+    console.error('error', e);
+  }
 }
 
 launch();

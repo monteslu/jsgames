@@ -1,5 +1,44 @@
 const window = globalThis;
 
+let audioContext;
+
+export async function loadSound(url) {
+  if (!audioContext) {
+    audioContext = new AudioContext();
+  }
+  const soundBuffer = await fetch(url).then(res => res.arrayBuffer());
+
+  const audioBuffer = await audioContext.decodeAudioData(soundBuffer);
+  return audioBuffer;
+}
+
+export function playSound(audioBuffer) {
+  if (!audioBuffer) {
+    return;
+  }
+  if (!audioContext) {
+    audioContext = new AudioContext();
+  }
+  const bufferSource = audioContext.createBufferSource();
+  bufferSource.buffer = audioBuffer;
+  
+  bufferSource.connect(audioContext.destination);
+  bufferSource.start();
+  bufferSource.onended = () => {
+    bufferSource.disconnect();
+  };
+}
+
+// loads image from a url as a promise
+export function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = (e) => reject(e);
+    img.src = src;
+  });
+}
+
 function getDefaultBtn() {
   return {
     pressed: false,
@@ -9,19 +48,21 @@ function getDefaultBtn() {
 
 const keys = {};
 window.addEventListener('keydown', (e) => {
-  // console.log('keydown on window', e);
   keys[e.key] = keys[e.key] || getDefaultBtn();
   keys[e.key].pressed = true;
   keys[e.key].value = 1;
 });
 window.addEventListener('keyup', (e) => {
-  // console.log('keyup on window', e);
   keys[e.key] = keys[e.key] || getDefaultBtn();
   keys[e.key].pressed = false;
   keys[e.key].value = 0;
 });
 
-export default function getInput() {
+
+// normalizes input from a gamepad or keyboard
+// if there's a gamepad, player 1 is the gamead and player 2 is the keyboard
+// if there's no gamepad, player 1 is the keyboard
+export function getInput() {
   const gamepads = navigator.getGamepads();
   const players = [];
   gamepads.forEach((gp) => {

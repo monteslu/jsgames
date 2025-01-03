@@ -1,10 +1,12 @@
 import getInput from './input.js';
 const { requestAnimationFrame } = globalThis;
 
-const TILE_SIZE = 512; // Size of each tile in pixels
+const TILE_SIZE = 256; // Size of each tile in pixels
 const player = { x: 2.5 * TILE_SIZE, y: 11.5 * TILE_SIZE, angle: 0 }; // Player position and angle
 
 let canvas = document.getElementById('game-canvas');
+canvas.width = 320;
+canvas.height = 240;
 const ctx = canvas.getContext('2d');
 
 const game = {
@@ -16,19 +18,19 @@ const game = {
 
 // Define the map
 const floor1 = [
-  'xxxxxxxxxxxxxxxxxxxxxxxx',
-  'x                      x',
-  'x          e           x',
-  'x    xx          xxx   x',
-  'x                      x',
-  'x           xxxx xxxx  x',
-  'x     xx               x',
-  'x            x         x',
-  'x            x  xxx    x',
-  'x       ss             x',
-  'x                      x',
-  'x              p       x',
-  'xxxxxxxxxxxxxxxxxxxxxxxx',
+  'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+  'x                              x',
+  'x          e                   x',
+  'x    xx          xxx           x',
+  'x                              x',
+  'x           xxxx xxxx          x',
+  'x     xx                       x',
+  'x            x            xxxxxx',
+  'x            x  xxx            x',
+  'x       ss                     x',
+  'x                      xx      x',
+  'x              p               x',
+  'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
 ];
 
 const map = floor1.map(row => row.split(''));

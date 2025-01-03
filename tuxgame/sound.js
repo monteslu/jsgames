@@ -1,7 +1,4 @@
-// import sdl from '@kmamal/sdl'
-
-const { sdl } = globalThis;
-
+import sdl from '@kmamal/sdl'
 const TWO_PI = 2 * Math.PI
 
 const playbackInstance = sdl.audio.openDevice({ type: 'playback' });
