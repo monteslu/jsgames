@@ -10,8 +10,30 @@ let lastTime = performance.now();
 let leftHeld = 0;
 let rightHeld = 0;
 
+// Track rotation button states
+let canRotateClockwise = true;
+let canRotateCounterClockwise = true;
+let canTogglePause = true;
+
 function handleInput() {
   const [player] = getInput();
+  
+  // Handle pause/unpause and game restart
+  if (player.START.pressed) {
+    if (canTogglePause) {
+      if (game.gameOver) {
+        game.reset();
+      } else {
+        game.paused = !game.paused;
+      }
+      canTogglePause = false;
+    }
+  } else {
+    canTogglePause = true;
+  }
+
+  // Don't process other inputs if game is paused or over
+  if (game.paused || game.gameOver) return;
   
   // Handle left/right movement with DAS (Delayed Auto Shift)
   if (player.DPAD_LEFT.pressed) {
@@ -32,12 +54,23 @@ function handleInput() {
     rightHeld = 0;
   }
   
-  // Rotation
-  if (player.BUTTON_SOUTH.pressed && !player.prevState?.BUTTON_SOUTH.pressed) {
-    game.rotate(true); // Clockwise with Z
+  // Rotation with button release check
+  if (player.BUTTON_SOUTH.pressed) {
+    if (canRotateClockwise) {
+      game.rotate(true);
+      canRotateClockwise = false;
+    }
+  } else {
+    canRotateClockwise = true;
   }
-  if (player.BUTTON_EAST.pressed && !player.prevState?.BUTTON_EAST.pressed) {
-    game.rotate(false); // Counter-clockwise with X
+  
+  if (player.BUTTON_EAST.pressed) {
+    if (canRotateCounterClockwise) {
+      game.rotate(false);
+      canRotateCounterClockwise = false;
+    }
+  } else {
+    canRotateCounterClockwise = true;
   }
   
   // Dropping
@@ -48,42 +81,40 @@ function handleInput() {
   }
   
   if (player.BUTTON_NORTH.pressed && !player.prevState?.BUTTON_NORTH.pressed) {
-    game.hardDrop(); // Hard drop with Up or Space
-  }
-  
-  // Reset game
-  if (player.START.pressed && !player.prevState?.START.pressed) {
-    game.reset();
+    game.hardDrop();
   }
   
   // Store previous state for edge detection
   player.prevState = {
-    BUTTON_SOUTH: { pressed: player.BUTTON_SOUTH.pressed },
-    BUTTON_EAST: { pressed: player.BUTTON_EAST.pressed },
-    BUTTON_NORTH: { pressed: player.BUTTON_NORTH.pressed },
-    START: { pressed: player.START.pressed }
+    BUTTON_NORTH: { pressed: player.BUTTON_NORTH.pressed }
   };
 }
 
 function gameLoop(timestamp) {
   handleInput();
-  game.update(timestamp);
+  
+  // Only update game state if not paused
+  if (!game.paused && !game.gameOver) {
+    game.update(timestamp);
+  }
   
   // Render
   renderer.drawBoard(game.board);
   
-  // Draw ghost piece
-  if (game.currentPiece && !game.gameOver) {
+  // Draw ghost piece and current piece if game is active
+  if (game.currentPiece && !game.gameOver && !game.paused) {
     const ghost = game.board.getGhostPosition(game.currentPiece);
     renderer.drawPiece(ghost, true);
     renderer.drawPiece(game.currentPiece);
   }
   
   renderer.drawPreview(game.nextPiece);
-  renderer.drawScore(game.score, game.level);
+  renderer.drawScore(game.score, game.level, game.lines);
   
   if (game.gameOver) {
     renderer.drawGameOver();
+  } else if (game.paused) {
+    renderer.drawPaused();
   }
   
   lastTime = timestamp;

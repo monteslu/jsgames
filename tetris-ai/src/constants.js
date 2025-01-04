@@ -15,7 +15,7 @@ export const COLORS = {
   L: '#f0a000', // orange
   ghost: '#333333', // ghost piece color
   grid: '#333333', // grid line color
-  background: '#000000', // background color
+  background: '#1a1a1a', // background color
   cleared: '#ffffff', // flash color for cleared lines
 };
 
@@ -63,7 +63,7 @@ export const POINTS = {
 // Game speed (milliseconds per drop)
 export const STARTING_SPEED = 1000;
 export const SOFT_DROP_SPEED = 50;
-export const LOCK_DELAY = 500;
+export const LOCK_DELAY = 300;
 
 // DAS (Delayed Auto Shift) settings
 export const DAS_DELAY = 167; // Initial delay before auto-repeat

@@ -117,22 +117,36 @@ export class Renderer {
     }
   }
 
-  drawScore(score, level) {
+  drawScore(score, level, lines) {
     this.ctx.fillStyle = '#ffffff';
     this.ctx.font = '20px monospace';
     this.ctx.textAlign = 'left';
     this.ctx.fillText(`Score: ${score}`, this.previewX, this.previewY + 150);
     this.ctx.fillText(`Level: ${level}`, this.previewX, this.previewY + 180);
+    this.ctx.fillText(`Lines: ${lines}`, this.previewX, this.previewY + 210);
   }
 
   drawGameOver() {
-    const text = 'GAME OVER';
+    this.drawOverlay('GAME OVER', 'Press START to play again');
+  }
+
+  drawPaused() {
+    this.drawOverlay('PAUSED', 'Press START to resume');
+  }
+
+  drawOverlay(mainText, subText) {
+    // Semi-transparent background
     this.ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
-    this.ctx.fillRect(0, this.canvas.height / 2 - 30, this.canvas.width, 60);
+    this.ctx.fillRect(0, this.canvas.height / 2 - 50, this.canvas.width, 100);
     
+    // Main text
     this.ctx.fillStyle = '#ffffff';
     this.ctx.font = '40px monospace';
     this.ctx.textAlign = 'center';
-    this.ctx.fillText(text, this.canvas.width / 2, this.canvas.height / 2 + 15);
+    this.ctx.fillText(mainText, this.canvas.width / 2, this.canvas.height / 2);
+    
+    // Sub text
+    this.ctx.font = '20px monospace';
+    this.ctx.fillText(subText, this.canvas.width / 2, this.canvas.height / 2 + 40);
   }
 }
