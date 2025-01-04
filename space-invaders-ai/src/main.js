@@ -61,11 +61,27 @@ function getScreenUnit(percentage, dimension = 'width') {
     return (percentage / 100) * (dimension === 'width' ? width : height);
 }
 
+function resetGame() {
+    gameState.reset();
+    player.reset(width);
+    enemyGrid.reset();
+}
+
 function update(deltaTime) {
+    const [input] = getInput();
+    
+    // Check for game reset
+    if (gameState.isGameOver() && (input.START.pressed || input.BUTTON_SOUTH.pressed)) {
+        resetGame();
+        return;
+    }
+
+    // Only update game objects if game is not over
     if (!gameState.isGameOver()) {
         player.update(deltaTime, width, height);
         enemyGrid.update(deltaTime, player);
     }
+    
     // Always update game state to handle restart input
     gameState.update(deltaTime);
 }
@@ -125,6 +141,15 @@ function draw() {
             restartText,
             (width - restartMetrics.width) / 2,
             height / 2 + gameOverSize
+        );
+
+        // Display final score
+        const finalScoreText = `Final Score: ${gameState.getScore()}`;
+        const scoreMetrics = ctx.measureText(finalScoreText);
+        ctx.fillText(
+            finalScoreText,
+            (width - scoreMetrics.width) / 2,
+            height / 2 + gameOverSize * 2
         );
     }
 }

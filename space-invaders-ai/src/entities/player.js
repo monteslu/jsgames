@@ -10,13 +10,50 @@ export class Player {
     this.sizes = sizes;  // Store size configuration
     this.bullets = [];
     this.lastShot = 0;
+    this.isAlive = true;
+    this.respawnTimer = 0;
+    this.invulnerableTimer = 0;
   }
 
   getScreenUnit(percentage, screenDimension, dimension = 'width') {
     return (percentage / 100) * (dimension === 'width' ? screenDimension : screenDimension);
   }
 
+  reset(screenWidth) {
+    this.x = screenWidth / 2 - this.getScreenUnit(this.sizes.WIDTH, screenWidth) / 2;
+    this.bullets = [];
+    this.lastShot = 0;
+    this.isAlive = true;
+    this.respawnTimer = 0;
+    this.invulnerableTimer = 2000; // 2 seconds of invulnerability after respawn
+  }
+
+  die() {
+    if (this.invulnerableTimer <= 0) {
+      this.isAlive = false;
+      this.respawnTimer = 1500; // 1.5 seconds before respawn
+      if (window.gameState) {
+        window.gameState.loseLife();
+      }
+    }
+  }
+
   update(deltaTime, screenWidth, screenHeight) {
+    // Update timers
+    if (this.respawnTimer > 0) {
+      this.respawnTimer -= deltaTime;
+      if (this.respawnTimer <= 0) {
+        this.reset(screenWidth);
+      }
+      return;
+    }
+
+    if (this.invulnerableTimer > 0) {
+      this.invulnerableTimer -= deltaTime;
+    }
+
+    if (!this.isAlive) return;
+
     const [input] = getInput();
     const playerWidth = this.getScreenUnit(this.sizes.WIDTH, screenWidth);
     
@@ -63,13 +100,15 @@ export class Player {
   }
 
   draw(ctx) {
+    if (!this.isAlive && this.respawnTimer > 0) return;
+
     const screenWidth = ctx.canvas.width;
     const screenHeight = ctx.canvas.height;
     const playerWidth = this.getScreenUnit(this.sizes.WIDTH, screenWidth);
     const playerHeight = this.getScreenUnit(this.sizes.HEIGHT, screenHeight, 'height');
     
-    // Draw player sprite
-    if (this.playerImg) {
+    // Draw player sprite with blinking effect during invulnerability
+    if (this.playerImg && (this.invulnerableTimer <= 0 || Math.floor(this.invulnerableTimer / 100) % 2 === 0)) {
       ctx.drawImage(this.playerImg, this.x, this.y, playerWidth, playerHeight);
     }
     
@@ -78,5 +117,16 @@ export class Player {
     this.bullets.forEach(bullet => {
       ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
     });
+  }
+
+  getBounds() {
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+    return {
+      x: this.x,
+      y: this.y,
+      width: this.getScreenUnit(this.sizes.WIDTH, screenWidth),
+      height: this.getScreenUnit(this.sizes.HEIGHT, screenHeight, 'height')
+    };
   }
 }

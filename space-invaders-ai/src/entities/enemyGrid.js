@@ -1,5 +1,6 @@
 import { ENEMY_SETTINGS, COLORS, GROUND_SETTINGS } from '../constants.js';
 import { playSound } from '../utils.js';
+import { ParticleSystem } from '../particle.js';
 
 export class EnemyGrid {
   constructor(screenWidth, screenHeight, enemyImages, enemyLaserSound, explosionSound, sizes) {
@@ -8,13 +9,23 @@ export class EnemyGrid {
     this.enemyImages = enemyImages;
     this.enemyLaserSound = enemyLaserSound;
     this.explosionSound = explosionSound;
-    this.sizes = sizes;  // Store size configuration
+    this.sizes = sizes;
     
-    this.direction = 1; // 1 for right, -1 for left
+    this.direction = 1;
     this.currentSpeed = ENEMY_SETTINGS.BASE_SPEED;
     this.bullets = [];
     this.lastShot = 0;
     
+    this.particleSystem = new ParticleSystem();
+    this.initializeEnemies();
+  }
+
+  reset() {
+    this.direction = 1;
+    this.currentSpeed = ENEMY_SETTINGS.BASE_SPEED;
+    this.bullets = [];
+    this.lastShot = 0;
+    this.particleSystem.clear();
     this.initializeEnemies();
   }
 
@@ -53,30 +64,28 @@ export class EnemyGrid {
   }
 
   update(deltaTime, player) {
+    // Update particle system
+    this.particleSystem.update(deltaTime);
+
     if (this.enemies.filter(e => e.alive).length === 0) {
       this.initializeEnemies();
       this.currentSpeed += ENEMY_SETTINGS.SPEED_INCREASE;
     }
 
-    // Update enemy positions
     let needsToDropAndReverse = false;
     const livingEnemies = this.enemies.filter(enemy => enemy.alive);
     
-    // Find edges of enemy formation
     const leftmost = Math.min(...livingEnemies.map(e => e.x));
     const rightmost = Math.max(...livingEnemies.map(e => e.x + e.width));
 
-    // Calculate movement distance
     const moveDistance = this.currentSpeed * this.screenWidth * (deltaTime / 1000);
 
-    // Check if we need to reverse direction
     if (this.direction > 0 && rightmost + moveDistance >= this.screenWidth) {
       needsToDropAndReverse = true;
     } else if (this.direction < 0 && leftmost - moveDistance <= 0) {
       needsToDropAndReverse = true;
     }
 
-    // Move enemies and check for ground collision
     const groundY = this.getScreenUnit(GROUND_SETTINGS.Y_PERCENT, 'height');
     
     this.enemies.forEach(enemy => {
@@ -88,10 +97,16 @@ export class EnemyGrid {
         enemy.x += this.direction * moveDistance;
       }
 
-      // Check if enemy has reached the ground
       if (enemy.y + enemy.height >= groundY) {
         if (window.gameState) {
           window.gameState.setGameOver();
+        }
+      }
+
+      if (player.isAlive && this.checkCollision(enemy, player.getBounds())) {
+        player.die();
+        if (this.explosionSound) {
+          playSound(this.explosionSound);
         }
       }
     });
@@ -100,7 +115,6 @@ export class EnemyGrid {
       this.direction *= -1;
     }
 
-    // Enemy shooting
     if (Date.now() - this.lastShot > ENEMY_SETTINGS.SHOOTING_INTERVAL) {
       if (Math.random() < ENEMY_SETTINGS.SHOOTING_CHANCE) {
         const shootingEnemies = livingEnemies.filter(enemy => {
@@ -117,23 +131,38 @@ export class EnemyGrid {
       this.lastShot = Date.now();
     }
 
-    // Update bullets
     const bulletSpeed = ENEMY_SETTINGS.BULLET_SPEED * this.screenHeight * (deltaTime / 1000);
-    this.bullets = this.bullets.filter(bullet => bullet.y < this.screenHeight);
-    this.bullets.forEach(bullet => {
+    this.bullets = this.bullets.filter(bullet => {
       bullet.y += bulletSpeed;
+      
+      if (player.isAlive && this.checkCollision(bullet, player.getBounds())) {
+        player.die();
+        if (this.explosionSound) {
+          playSound(this.explosionSound);
+        }
+        return false;
+      }
+      
+      return bullet.y < this.screenHeight;
     });
 
-    // Check for collisions with player bullets
     player.bullets.forEach(bullet => {
       this.enemies.forEach(enemy => {
         if (!enemy.alive) return;
         
         if (this.checkCollision(bullet, enemy)) {
           enemy.alive = false;
-          bullet.y = -100; // Remove bullet
+          bullet.y = -100;
+
+          // Create explosion effect
+          const explosionX = enemy.x + enemy.width / 2;
+          const explosionY = enemy.y + enemy.height / 2;
           
-          // Add points based on row
+          // Create multiple particle systems with different colors for a more dynamic effect
+          this.particleSystem.createExplosion(explosionX, explosionY, '#FFD700', 15); // Gold particles
+          this.particleSystem.createExplosion(explosionX, explosionY, '#FF4500', 10); // Red-orange particles
+          this.particleSystem.createExplosion(explosionX, explosionY, '#FFFFFF', 5);  // White particles
+          
           const points = ENEMY_SETTINGS.POINTS[`ROW_${enemy.row}`];
           if (window.gameState) {
             window.gameState.addScore(points);
@@ -175,7 +204,6 @@ export class EnemyGrid {
     this.enemies.forEach(enemy => {
       if (!enemy.alive) return;
       
-      // Draw enemy sprite
       const enemyImage = this.enemyImages[enemy.type];
       if (enemyImage) {
         ctx.drawImage(enemyImage, enemy.x, enemy.y, enemy.width, enemy.height);
@@ -187,5 +215,8 @@ export class EnemyGrid {
     this.bullets.forEach(bullet => {
       ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
     });
+
+    // Draw particle effects
+    this.particleSystem.draw(ctx);
   }
 }
