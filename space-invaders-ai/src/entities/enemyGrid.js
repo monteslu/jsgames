@@ -78,7 +78,18 @@ export class EnemyGrid {
     const leftmost = Math.min(...livingEnemies.map(e => e.x));
     const rightmost = Math.max(...livingEnemies.map(e => e.x + e.width));
 
-    const moveDistance = this.currentSpeed * this.screenWidth * (deltaTime / 1000);
+    // Calculate speed multiplier based on remaining enemies
+    const totalEnemies = ENEMY_SETTINGS.ROWS * ENEMY_SETTINGS.COLS;
+    const remainingEnemies = livingEnemies.length;
+    const enemiesDestroyed = totalEnemies - remainingEnemies;
+    
+    // Scale speed based on how many enemies have been destroyed
+    const speedMultiplier = Math.min(
+      1 + (enemiesDestroyed * ENEMY_SETTINGS.SPEED_SCALE_FACTOR),
+      ENEMY_SETTINGS.MAX_SPEED_MULTIPLIER
+    );
+    
+    const moveDistance = this.currentSpeed * speedMultiplier * this.screenWidth * (deltaTime / 1000);
 
     if (this.direction > 0 && rightmost + moveDistance >= this.screenWidth) {
       needsToDropAndReverse = true;

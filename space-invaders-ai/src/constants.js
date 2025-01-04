@@ -23,6 +23,8 @@ export const ENEMY_SETTINGS = {
     STARTING_Y_PERCENT: 5,
     BASE_SPEED: 0.05, // 5% of screen width per second
     SPEED_INCREASE: 0.02,
+    SPEED_SCALE_FACTOR: 0.1,  // How much to increase speed per enemy destroyed
+    MAX_SPEED_MULTIPLIER: 3,  // Maximum speed multiplier when few enemies remain
     DROP_DISTANCE_PERCENT: 6.25,
     SHOOTING_INTERVAL: 2000,
     SHOOTING_CHANCE: 0.3,

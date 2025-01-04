@@ -29,7 +29,7 @@ const SIZES = {
 };
 
 // Game assets
-let laserSound, enemyLaserSound, explosionSound;
+let laserSound, enemyLaserSound, explosionSound, gameOverSound;
 let playerImg;
 let enemyImages = {};
 
@@ -71,7 +71,7 @@ function update(deltaTime) {
     const [input] = getInput();
     
     // Check for game reset
-    if (gameState.isGameOver() && (input.START.pressed || input.BUTTON_SOUTH.pressed)) {
+    if (gameState.isGameOver() && input.START.pressed) {
         resetGame();
         return;
     }
@@ -135,7 +135,7 @@ function draw() {
         );
         
         ctx.font = `${scoreFontSize}px monospace`;
-        const restartText = 'Press ENTER or Z to restart';
+        const restartText = 'Press START button to restart';
         const restartMetrics = ctx.measureText(restartText);
         ctx.fillText(
             restartText,
@@ -173,6 +173,7 @@ async function initGame() {
         laserSound = await loadSound('sounds/laser.mp3');
         enemyLaserSound = await loadSound('sounds/enemylaser.mp3');
         explosionSound = await loadSound('sounds/explosion.mp3');
+        gameOverSound = await loadSound('sounds/game-over.mp3');
         
         // Load images
         playerImg = await loadImage('images/player.png');
@@ -186,7 +187,7 @@ async function initGame() {
         };
 
         // Initialize game objects
-        gameState = new GameState();
+        gameState = new GameState(gameOverSound);
         window.gameState = gameState; // Make it accessible to enemy grid for scoring
         
         player = new Player(
