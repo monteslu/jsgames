@@ -19,8 +19,8 @@ const SIZES = {
     ENEMY: {
         WIDTH: (27 / width) * 100,    // 27px relative to screen width
         HEIGHT: (33 / height) * 100,  // 33px relative to screen height
-        BULLET_WIDTH: (2 / width) * 100,
-        BULLET_HEIGHT: (8 / height) * 100
+        BULLET_WIDTH: (4 / width) * 100,
+        BULLET_HEIGHT: (12 / height) * 100
     },
     STAR: {
         MIN: (1 / width) * 100,

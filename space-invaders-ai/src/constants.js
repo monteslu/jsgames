@@ -21,13 +21,13 @@ export const ENEMY_SETTINGS = {
     HORIZONTAL_SPACING_PERCENT: 2.3,
     VERTICAL_SPACING_PERCENT: 3.1,
     STARTING_Y_PERCENT: 5,
-    BASE_SPEED: 0.05, // 5% of screen width per second
+    BASE_SPEED: 0.03, // 3% of screen width per second
     SPEED_INCREASE: 0.02,
     SPEED_SCALE_FACTOR: 0.1,  // How much to increase speed per enemy destroyed
     MAX_SPEED_MULTIPLIER: 3,  // Maximum speed multiplier when few enemies remain
     DROP_DISTANCE_PERCENT: 6.25,
-    SHOOTING_INTERVAL: 2000,
-    SHOOTING_CHANCE: 0.3,
+    SHOOTING_INTERVAL: 1000,
+    SHOOTING_CHANCE: 0.4,
     BULLET_SPEED: 0.3, // 30% of screen height per second
     POINTS: {
         ROW_0: 50,
@@ -50,6 +50,7 @@ export const COLORS = {
     BACKGROUND: '#000000',
     PLAYER_BULLET: '#FFFFFF',
     ENEMY_BULLET: '#FF0000',
+    ENEMY_BULLET_2: '#FFFF00',
     TEXT: '#FFFFFF',
     SCORE: '#FFFFFF',
     LIVES: '#00FF00',

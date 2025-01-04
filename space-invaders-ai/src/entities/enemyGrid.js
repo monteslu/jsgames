@@ -221,11 +221,17 @@ export class EnemyGrid {
       }
     });
 
-    // Draw enemy bullets
-    ctx.fillStyle = COLORS.ENEMY_BULLET;
-    this.bullets.forEach(bullet => {
-      ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
-    });
+    if (this.bullets.length > 0) {
+      // Draw enemy bullets
+      ctx.fillStyle = COLORS.ENEMY_BULLET;
+      ctx.strokeStyle = COLORS.ENEMY_BULLET_2;
+      ctx.lineWidth = this.bullets[0].width / 4;
+      this.bullets.forEach(bullet => {
+        ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+        ctx.strokeRect(bullet.x, bullet.y, bullet.width, bullet.height);
+      });
+    }
+    
 
     // Draw particle effects
     this.particleSystem.draw(ctx);
