@@ -1,4 +1,4 @@
-import { Game } from './game.js';
+import { Game } from './game-core.js';
 import { Renderer } from './renderer.js';
 import { getInput } from './utils.js';
 
