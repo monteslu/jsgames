@@ -1,5 +1,6 @@
 import { getInput, playSound } from '../utils.js';
 import { PLAYER_SETTINGS, COLORS } from '../constants.js';
+import { ParticleSystem } from '../particle.js';
 
 export class Player {
   constructor(x, y, laserSound, playerImg, sizes) {
@@ -13,6 +14,7 @@ export class Player {
     this.isAlive = true;
     this.respawnTimer = 0;
     this.invulnerableTimer = 0;
+    this.particleSystem = new ParticleSystem(); // Add particle system
   }
 
   getScreenUnit(percentage, screenDimension, dimension = 'width') {
@@ -26,12 +28,24 @@ export class Player {
     this.isAlive = true;
     this.respawnTimer = 0;
     this.invulnerableTimer = 2000; // 2 seconds of invulnerability after respawn
+    this.particleSystem.clear(); // Clear any remaining particles
   }
 
   die() {
     if (this.invulnerableTimer <= 0) {
       this.isAlive = false;
       this.respawnTimer = 1500; // 1.5 seconds before respawn
+      
+      // Create explosion effect at player's center position
+      const bounds = this.getBounds();
+      const centerX = bounds.x + bounds.width / 2;
+      const centerY = bounds.y + bounds.height / 2;
+      
+      // Create multiple particle systems with different shades of green for a more dynamic effect
+      this.particleSystem.createExplosion(centerX, centerY, '#00FF00', 20); // Bright green particles
+      this.particleSystem.createExplosion(centerX, centerY, '#32CD32', 15); // Lime green particles
+      this.particleSystem.createExplosion(centerX, centerY, '#228B22', 10); // Forest green particles
+      
       if (window.gameState) {
         window.gameState.loseLife();
       }
@@ -39,6 +53,9 @@ export class Player {
   }
 
   update(deltaTime, screenWidth, screenHeight) {
+    // Update particle system
+    this.particleSystem.update(deltaTime);
+    
     // Update timers
     if (this.respawnTimer > 0) {
       this.respawnTimer -= deltaTime;
@@ -100,7 +117,11 @@ export class Player {
   }
 
   draw(ctx) {
-    if (!this.isAlive && this.respawnTimer > 0) return;
+    if (!this.isAlive && this.respawnTimer > 0) {
+      // Draw particle effects even when player is not alive
+      this.particleSystem.draw(ctx);
+      return;
+    }
 
     const screenWidth = ctx.canvas.width;
     const screenHeight = ctx.canvas.height;
@@ -117,6 +138,9 @@ export class Player {
     this.bullets.forEach(bullet => {
       ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
     });
+
+    // Draw particle effects
+    this.particleSystem.draw(ctx);
   }
 
   getBounds() {

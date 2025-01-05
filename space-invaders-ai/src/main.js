@@ -11,49 +11,111 @@ const { width, height } = canvas;
 // Calculate relative sizes based on actual canvas dimensions
 const SIZES = {
     PLAYER: {
-        WIDTH: (24 / width) * 100,    // 24px relative to screen width
-        HEIGHT: (24 / height) * 100,  // 24px relative to screen height
+        WIDTH: (24 / width) * 100,
+        HEIGHT: (24 / height) * 100,
         BULLET_WIDTH: (2 / width) * 100,
         BULLET_HEIGHT: (8 / height) * 100
     },
     ENEMY: {
-        WIDTH: (27 / width) * 100,    // 27px relative to screen width
-        HEIGHT: (33 / height) * 100,  // 33px relative to screen height
+        WIDTH: (27 / width) * 100,
+        HEIGHT: (33 / height) * 100,
         BULLET_WIDTH: (4 / width) * 100,
         BULLET_HEIGHT: (12 / height) * 100
-    },
-    STAR: {
-        MIN: (1 / width) * 100,
-        MAX: (2 / width) * 100
     }
 };
 
 // Game assets
 let laserSound, enemyLaserSound, explosionSound, gameOverSound;
 let playerImg;
-let enemyImages = {};
+let enemyImages = {
+    enemy1: [],
+    enemy2: [],
+    enemy3: [],
+    enemy4: [],
+    enemy5: [],
+    enemy6: []
+};
 
 // Game objects
 let gameState;
 let player;
 let enemyGrid;
 
-// Initialize starfield
-const stars = Array(CONSTANTS.STAR_SETTINGS.COUNT).fill(null).map(() => ({
-    x: Math.random() * width,
-    y: Math.random() * height,
-    size: Math.random() * (SIZES.STAR.MAX - SIZES.STAR.MIN) + SIZES.STAR.MIN
-}));
+// Star colors
+const STAR_COLORS = [
+    '#FFFFFF', // White
+    '#ADD8E6', // Light blue
+    '#FFFFD0'  // Light yellow
+];
 
-function drawStarfield() {
-    ctx.fillStyle = CONSTANTS.COLORS.TEXT;
-    stars.forEach(star => {
-        ctx.fillRect(star.x, star.y, star.size, star.size);
-        star.y += (CONSTANTS.STAR_SETTINGS.SPEED_PERCENT * height) / 100;
-        if (star.y > height) {
-            star.y = 0;
-            star.x = Math.random() * width;
-        }
+// Initialize three layers of stars for parallax effect
+const starLayers = [
+    // Distant stars (small and slow)
+    Array.from({ length: 50 }, () => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        speed: height * 0.05,
+        size: 1,
+        color: STAR_COLORS[Math.floor(Math.random() * STAR_COLORS.length)],
+        twinkleSpeed: 0.003 + Math.random() * 0.007,
+        twinklePhase: Math.random() * Math.PI * 2,
+        maxBrightness: 0.7 + Math.random() * 0.3
+    })),
+    // Mid-distance stars
+    Array.from({ length: 30 }, () => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        speed: height * 0.1,
+        size: 1,
+        color: STAR_COLORS[Math.floor(Math.random() * STAR_COLORS.length)],
+        twinkleSpeed: 0.003 + Math.random() * 0.007,
+        twinklePhase: Math.random() * Math.PI * 2,
+        maxBrightness: 0.7 + Math.random() * 0.3
+    })),
+    // Close stars (faster)
+    Array.from({ length: 20 }, () => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        speed: height * 0.2,
+        size: 1,
+        color: STAR_COLORS[Math.floor(Math.random() * STAR_COLORS.length)],
+        twinkleSpeed: 0.003 + Math.random() * 0.007,
+        twinklePhase: Math.random() * Math.PI * 2,
+        maxBrightness: 0.7 + Math.random() * 0.3
+    }))
+];
+
+function drawStarfield(deltaTime) {
+    // Draw each layer of stars
+    starLayers.forEach((layer) => {
+        layer.forEach(star => {
+            // Update star position
+            star.y += star.speed * (deltaTime / 1000);
+            
+            // Wrap stars around when they go off screen
+            if (star.y > height) {
+                star.y = 0;
+                star.x = Math.random() * width;
+                star.color = STAR_COLORS[Math.floor(Math.random() * STAR_COLORS.length)];
+            }
+            
+            // Update twinkle
+            star.twinklePhase += star.twinkleSpeed * deltaTime;
+            const brightness = (Math.sin(star.twinklePhase) * 0.5 + 0.5) * star.maxBrightness;
+            
+            // Convert hex color to RGB for alpha support
+            let color = star.color;
+            if (color.length === 7) { // hex color
+                const r = parseInt(color.substr(1,2), 16);
+                const g = parseInt(color.substr(3,2), 16);
+                const b = parseInt(color.substr(5,2), 16);
+                color = `rgba(${r}, ${g}, ${b}, ${brightness})`;
+            }
+            
+            // Draw star with color and brightness
+            ctx.fillStyle = color;
+            ctx.fillRect(star.x, star.y, star.size, star.size);
+        });
     });
 }
 
@@ -70,29 +132,26 @@ function resetGame() {
 function update(deltaTime) {
     const [input] = getInput();
     
-    // Check for game reset
     if (gameState.isGameOver() && input.START.pressed) {
         resetGame();
         return;
     }
 
-    // Only update game objects if game is not over
     if (!gameState.isGameOver()) {
         player.update(deltaTime, width, height);
         enemyGrid.update(deltaTime, player);
     }
     
-    // Always update game state to handle restart input
     gameState.update(deltaTime);
 }
 
-function draw() {
+function draw(deltaTime) {
     // Clear canvas
     ctx.fillStyle = CONSTANTS.COLORS.BACKGROUND;
     ctx.fillRect(0, 0, width, height);
     
     // Draw starfield
-    drawStarfield();
+    drawStarfield(deltaTime);
 
     // Draw game objects
     player.draw(ctx);
@@ -143,7 +202,6 @@ function draw() {
             height / 2 + gameOverSize
         );
 
-        // Display final score
         const finalScoreText = `Final Score: ${gameState.getScore()}`;
         const scoreMetrics = ctx.measureText(finalScoreText);
         ctx.fillText(
@@ -161,10 +219,20 @@ function gameLoop(timestamp) {
     const deltaTime = timestamp - gameState.lastTime;
     
     update(deltaTime);
-    draw();
+    draw(deltaTime);
     
     gameState.lastTime = timestamp;
     requestAnimationFrame(gameLoop);
+}
+
+async function loadEnemyAnimations() {
+    // Load all animation frames for each enemy type
+    for (let enemyType = 1; enemyType <= 6; enemyType++) {
+        for (let frame = 1; frame <= 8; frame++) {
+            const img = await loadImage(`images/enemy${enemyType}-${frame}.png`);
+            enemyImages[`enemy${enemyType}`].push(img);
+        }
+    }
 }
 
 async function initGame() {
@@ -177,18 +245,11 @@ async function initGame() {
         
         // Load images
         playerImg = await loadImage('images/player.png');
-        enemyImages = {
-            enemy1: await loadImage('images/enemy1.png'),
-            enemy2: await loadImage('images/enemy2.png'),
-            enemy3: await loadImage('images/enemy3.png'),
-            enemy4: await loadImage('images/enemy4.png'),
-            enemy5: await loadImage('images/enemy5.png'),
-            enemy6: await loadImage('images/enemy6.png')
-        };
+        await loadEnemyAnimations();
 
         // Initialize game objects
         gameState = new GameState(gameOverSound);
-        window.gameState = gameState; // Make it accessible to enemy grid for scoring
+        window.gameState = gameState;
         
         player = new Player(
             width / 2 - getScreenUnit(SIZES.PLAYER.WIDTH) / 2,

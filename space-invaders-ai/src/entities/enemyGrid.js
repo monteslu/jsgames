@@ -15,6 +15,8 @@ export class EnemyGrid {
     this.currentSpeed = ENEMY_SETTINGS.BASE_SPEED;
     this.bullets = [];
     this.lastShot = 0;
+    this.lastAnimationUpdate = 0;
+    this.animationInterval = 150; // Animation frame changes every 250ms
     
     this.particleSystem = new ParticleSystem();
     this.initializeEnemies();
@@ -25,6 +27,7 @@ export class EnemyGrid {
     this.currentSpeed = ENEMY_SETTINGS.BASE_SPEED;
     this.bullets = [];
     this.lastShot = 0;
+    this.lastAnimationUpdate = 0;
     this.particleSystem.clear();
     this.initializeEnemies();
   }
@@ -57,13 +60,29 @@ export class EnemyGrid {
           type: enemyType,
           row: row,
           animationFrame: 0,
-          lastAnimationTime: 0
+          lastFrameUpdate: 0
         });
       }
     }
   }
 
+  updateAnimations(timestamp) {
+    if (timestamp - this.lastAnimationUpdate >= this.animationInterval) {
+      this.enemies.forEach(enemy => {
+        if (!enemy.alive) return;
+        
+        // Move to next animation frame
+        enemy.animationFrame = (enemy.animationFrame + 1) % 8;
+      });
+      
+      this.lastAnimationUpdate = timestamp;
+    }
+  }
+
   update(deltaTime, player) {
+    // Update animations
+    this.updateAnimations(performance.now());
+    
     // Update particle system
     this.particleSystem.update(deltaTime);
 
@@ -215,9 +234,15 @@ export class EnemyGrid {
     this.enemies.forEach(enemy => {
       if (!enemy.alive) return;
       
-      const enemyImage = this.enemyImages[enemy.type];
-      if (enemyImage) {
-        ctx.drawImage(enemyImage, enemy.x, enemy.y, enemy.width, enemy.height);
+      const enemyImageArray = this.enemyImages[enemy.type];
+      if (enemyImageArray && enemyImageArray[enemy.animationFrame]) {
+        ctx.drawImage(
+          enemyImageArray[enemy.animationFrame],
+          enemy.x,
+          enemy.y,
+          enemy.width,
+          enemy.height
+        );
       }
     });
 
@@ -231,7 +256,6 @@ export class EnemyGrid {
         ctx.strokeRect(bullet.x, bullet.y, bullet.width, bullet.height);
       });
     }
-    
 
     // Draw particle effects
     this.particleSystem.draw(ctx);

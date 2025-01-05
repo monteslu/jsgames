@@ -57,10 +57,26 @@ export const COLORS = {
     GROUND: '#33FF33'
 };
 
-// Star field settings
+// Enhanced star field settings
 export const STAR_SETTINGS = {
-    COUNT: 50,
-    SPEED_PERCENT: 0.1
+    COUNT: 150,  // Increased star count
+    BASE_SPEED_PERCENT: 0.1,
+    LAYERS: [
+        { count: 70, speed: 0.05, size: [1, 2] },    // Distant stars (smaller, slower)
+        { count: 50, speed: 0.1, size: [2, 3] },     // Mid-distance stars
+        { count: 30, speed: 0.15, size: [3, 4] }     // Close stars (larger, faster)
+    ],
+    TWINKLE: {
+        CHANCE: 0.3,        // 30% chance for a star to twinkle
+        MIN_SPEED: 0.02,    // Minimum twinkle speed
+        MAX_SPEED: 0.05     // Maximum twinkle speed
+    },
+    SHOOTING_STAR: {
+        INTERVAL: 2000,     // How often to check for creating a shooting star (ms)
+        CHANCE: 0.1,        // 10% chance to create a shooting star on each interval
+        SPEED_MULTIPLIER: 5, // How much faster than normal stars
+        TRAIL_LENGTH: 10    // Length of the shooting star trail
+    }
 };
 
 // UI settings
