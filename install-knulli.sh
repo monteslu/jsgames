@@ -51,7 +51,9 @@ else
 fi
 
 my_warning() {
-    my_echo "=> NOTE! This script assumes your roms are stored in /userdata/roms on the root device. We need to do more testing on a device we a secondary SD card to get this to work in those situations. "
+    my_echo "=> NOTE! You need to run the 'Update Gamelists' Knulli option to get the game to show up. "
+    my_echo "=> NOTE! This script assumes your roms are stored in /userdata/roms on the root device. "
+    my_echo "=> NOTE! We need to do more testing on a device we a secondary SD card to get this to work in those situations. "
     my_echo "=> NOTE! This script will also delete and replace any existing games in /userdata/roms/jsgames that have matching names. "
 }
 
