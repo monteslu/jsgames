@@ -13,7 +13,9 @@ my_has() {
 my_distro_check() {
   if grep -q "knulli" /etc/issue; then
     return 0  # True
-  else
+  elif grep -q "READY" /etc/issue; then
+    return 0  # True
+  else 
     return 1  # False
   fi
 }
@@ -30,8 +32,7 @@ my_reset() {
   unset -f my_has my_echo my_distro_check my_grep
 }
 
-
-my_echo "=> STARTING SAMMPLE GAME INSTALL SCRIPT"
+my_echo "=> STARTING SAMPLE GAME INSTALL SCRIPT"
 
 if [ -z "${BASH_VERSION}" ] || [ -n "${ZSH_VERSION}" ]; then
   my_echo >&2 'Error: the install instructions explicitly say to pipe the install script to `bash`; please follow them'
@@ -44,14 +45,14 @@ my_grep() {
 
 # check to see if I'm running on a knulli device
 if my_distro_check; then
-  my_echo "=> This is a knulli device, /etc/issue says so"
+  my_echo "=> This is a compatible device, /etc/issue says so"
 else
-  my_echo "=> This NOT is a knulli device, EXITING!!"
+  my_echo "=> This NOT is a compatible device, EXITING!!"
   exit 1
 fi
 
 my_warning() {
-    my_echo "=> NOTE! You need to run the 'Update Gamelists' Knulli option to get the game to show up. "
+    my_echo "=> NOTE! You need to run the 'Update Gamelists' Knulli/Batocera option to get the game to show up. "
     my_echo "=> NOTE! This script assumes your roms are stored in /userdata/roms on the root device. "
     my_echo "=> NOTE! We need to do more testing on a device we a secondary SD card to get this to work in those situations. "
     my_echo "=> NOTE! This script will also delete and replace any existing games in /userdata/roms/jsgames that have matching names. "
@@ -79,7 +80,7 @@ unzip newmygames.zip
 
 
 if my_distro_check; then
-  my_echo "=> This is a knulli device, so I'm copying the sample games"
+  my_echo "=> This is a compatible device so I'm copying the sample games"
 
   if [ -d "/userdata/roms/jsgames" ]; then
     my_echo "=> Folder /userdata/roms/jsgames exists, no need to create it."
@@ -105,7 +106,7 @@ if my_distro_check; then
   my_echo "=> INSTALL SUCCESSFUL!"
   cd ~
 else
-  my_echo "=> my_distro_check says this is NOT is a knulli device, so I'm not moving files around!"
+  my_echo "=> my_distro_check says this is NOT is a compatible device, so I'm not moving files around!"
   my_echo "=> INSTALL NOT SUCCESSFUL!"
 fi
 
