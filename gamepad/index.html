@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Responsive Canvas with Aspect Ratio</title>
+  <style>
+    /* Ensure the body and html fill the entire window */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #000; /* Optional background */
+      overflow: hidden;
+    }
+
+    /* Keep the canvas centered and ensure it scales while maintaining aspect ratio */
+    canvas {
+      display: block;
+      background-color: #fff; /* Optional background for the canvas */
+      border: 1px solid #000; /* Optional border */
+    }
+
+    img {
+      image-rendering: pixelated;
+    }
+  </style>
+</head>
+<body>
+  <!-- Internal aspect ratio 4:3 -->
+  <canvas id="gameCanvas" width="640" height="480"></canvas>
+  <script>
+    const canvas = document.querySelectorAll('canvas')[0];
+    const ctx = canvas.getContext("2d");
+
+    // Disable smoothing for pixel-perfect scaling
+    ctx.imageSmoothingEnabled = false;
+
+    // Function to resize the canvas while maintaining its aspect ratio
+    function resizeCanvas() {
+      const aspectRatio = canvas.width / canvas.height;
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+
+      if (windowWidth / windowHeight > aspectRatio) {
+        // Window is wider than canvas aspect ratio => black bars on the sides
+        canvas.style.width = `${windowHeight * aspectRatio}px`;
+        canvas.style.height = `${windowHeight}px`;
+      } else {
+        // Window is taller than canvas aspect ratio => black bars on the top and bottom
+        canvas.style.width = `${windowWidth}px`;
+        canvas.style.height = `${windowWidth / aspectRatio}px`;
+      }
+    }
+
+    // Redraw the canvas on resize
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas(); // Initial resize
+  </script>
+  <script src="./src/main.js" type="module"></script>
+</body>
+</html>
