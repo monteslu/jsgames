@@ -130,14 +130,27 @@ function draw() {
   ctx.fillStyle = 'blue';
   ctx.fillRect(0, 0, width, height);
   ctx.drawImage(gamepadImg, 0, 0, gamepadWidth, gamepadHeight);
-  if (p1) {
-    ctx.fillStyle = 'white';
-    ctx.font = `${buttonSize / 1.5}px Arial`;
+  if (p1.gp) {
+    ctx.fillStyle = 'yellow';
+    ctx.font = `${buttonSize / 2}px Arial`;
     ctx.textAlign = 'left';
-    wrapText(ctx, p1.name, gamepadWidth * 0.9, buttonSize, width / 2, buttonSize);
-    if (p1.gp) {
-      // console.log(p1.gp.buttons.map(b => b.pressed ? 1 : 0));
+    let guidText = '';
+    // console.log('p1', p1.gp.guid);
+    if (p1.gp.guid) {
+      let guid = p1.gp.guid || '';
+      if (guid.length === 32) {
+        guid = guid.slice(0, 8) + ' ' + guid.slice(8, 16) + ' ' + guid.slice(16, 24) + ' ' + guid.slice(24, 32);
+      }
+      guidText = ' \nguid: ' + guid;
     }
+    if (p1.gp._jsMap?.dbMatch) {
+      guidText += ' - dbMatch: ' + p1.gp._jsMap.dbMatch.name;
+      const dbGuid = p1.gp._jsMap.dbMatch.guid;
+      if (dbGuid.length === 32) {
+        guidText += ' ' + dbGuid.slice(0, 8) + ' ' + dbGuid.slice(8, 16) + ' ' + dbGuid.slice(16, 24) + ' ' + dbGuid.slice(24, 32);
+      }
+    }
+    wrapText(ctx, p1.name + guidText, gamepadWidth, buttonSize, width / 2, buttonSize);
     if (p1.BUTTON_SOUTH.pressed) {
       drawCircle(BUTTON_SOUTH_X * gps, BUTTON_SOUTH_Y * gps, btnRadius, 'red');
     }
@@ -206,7 +219,7 @@ function draw() {
       ctx.fillText('Axes:', (gps * 20), gamepadHeight + (buttonSize * 1.6));
       ctx.font = `${buttonSize / 2}px Arial`;
       p1.gp.axes.forEach((a, idx) => {
-        ctx.fillText(Number(a).toFixed(6), (idx * buttonSize * 2.5) + (gps * 90), gamepadHeight + (buttonSize * 1.6));
+        ctx.fillText(Number(a).toFixed(5), (idx * buttonSize * 2.5) + (gps * 90), gamepadHeight + (buttonSize * 1.6));
       });
     }
     if (_jsg) {
@@ -240,6 +253,7 @@ function draw() {
           // add space between buttons
           drawSimpleButton(idx, (idx * buttonSize * 1.2) + (gps * 10), gamepadHeight + (buttonSize * 4), buttonSize, b);
         });
+        ctx.fillStyle = 'white';
         ctx.font = `${buttonSize / 2}px Arial`;
         ctx.textAlign = 'left';
         ctx.fillText('Axes:', (gps * 20), gamepadHeight + (buttonSize * 6));
