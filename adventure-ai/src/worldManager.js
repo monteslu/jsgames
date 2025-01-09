@@ -12,15 +12,14 @@ export class WorldManager {
         this.currentScreenY = 0;
         this.combatSystem = combatSystem;
         
-        // Initialize empty world grid
         this.worldGrid = Array(this.worldHeight).fill().map(() => 
             Array(this.worldWidth).fill().map(() => ({
                 layout: this.createEmptyScreen(),
                 items: new Set(),
                 enemies: new Set(),
-                enemyData: [], // Stores enemy configurations for respawning
+                enemyData: [],
                 visited: false,
-                cleared: false // Tracks if all enemies have been defeated
+                cleared: false
             }))
         );
     }
@@ -44,7 +43,6 @@ export class WorldManager {
                         cleared: false
                     };
                     
-                    // Initialize enemies if this is a combat room
                     if (screenData.enemies) {
                         this.initializeEnemies(screen);
                     }
@@ -94,13 +92,11 @@ export class WorldManager {
                 break;
         }
         
-        // Check if the next screen exists and is different from current
         if (nextX === this.currentScreenX && nextY === this.currentScreenY) {
             return null;
         }
         
-        const nextScreen = this.worldGrid[nextY][nextX];
-        return nextScreen || null;
+        return this.worldGrid[nextY][nextX] || null;
     }
 
     changeScreen(direction) {
@@ -144,18 +140,81 @@ export class WorldManager {
         return success;
     }
 
+    isWalkable(x, y) {
+        // Convert float coordinates to tile coordinates
+        const tileX = Math.floor(x);
+        const tileY = Math.floor(y);
+
+        // Check screen boundaries with margin for transitions
+        if (x < -0.45 || x > this.screenWidth - 0.55 || 
+            y < -0.45 || y > this.screenHeight - 0.55) {
+            return true; // Allow movement for screen transitions
+        }
+
+        // Get the 4 surrounding tiles for collision check
+        const tiles = [
+            [tileX, tileY],             // Current tile
+            [tileX + 1, tileY],         // Right tile
+            [tileX, tileY + 1],         // Bottom tile
+            [tileX + 1, tileY + 1]      // Bottom-right tile
+        ];
+
+        // Check hitbox against each relevant tile
+        const HITBOX_SIZE = 0.8;  // Slightly smaller than 1 tile
+        const playerBox = {
+            left: x - HITBOX_SIZE / 2,
+            right: x + HITBOX_SIZE / 2,
+            top: y - HITBOX_SIZE / 2,
+            bottom: y + HITBOX_SIZE / 2
+        };
+
+        // Check each tile that the hitbox might intersect
+        for (const [checkX, checkY] of tiles) {
+            // Skip tiles outside the screen
+            if (checkX < 0 || checkX >= this.screenWidth || 
+                checkY < 0 || checkY >= this.screenHeight) {
+                continue;
+            }
+
+            const tile = this.getCurrentScreen().layout[checkY][checkX];
+            if (tile === TILE_TYPES.WALL || 
+                (tile === TILE_TYPES.DOOR && !this.hasKey)) {
+                // Create tile collision box
+                const tileBox = {
+                    left: checkX,
+                    right: checkX + 1,
+                    top: checkY,
+                    bottom: checkY + 1
+                };
+
+                // Check for intersection
+                if (this.boxesIntersect(playerBox, tileBox)) {
+                    return false;
+                }
+            }
+        }
+        
+        return true;
+    }
+
+    boxesIntersect(a, b) {
+        return !(
+            a.right < b.left ||
+            a.left > b.right ||
+            a.bottom < b.top ||
+            a.top > b.bottom
+        );
+    }
+
     update(deltaTime, player) {
         const currentScreen = this.getCurrentScreen();
         
-        // Update all enemies in the current screen
         for (const enemy of currentScreen.enemies) {
             enemy.update(deltaTime, player, this);
             
-            // Remove dead enemies
             if (enemy.isDead()) {
                 currentScreen.enemies.delete(enemy);
                 
-                // Check if screen is cleared
                 if (currentScreen.enemies.size === 0) {
                     currentScreen.cleared = true;
                     this.handleRoomClear(currentScreen);
@@ -165,58 +224,12 @@ export class WorldManager {
     }
 
     handleRoomClear(screen) {
-        // Spawn rewards, trigger events, etc.
-        if (Math.random() < 0.3) { // 30% chance
+        if (Math.random() < 0.3) {
             const x = Math.floor(this.screenWidth / 2);
             const y = Math.floor(this.screenHeight / 2);
             screen.layout[y][x] = TILE_TYPES.HEART;
             screen.items.add(`${x},${y}`);
         }
-    }
-
-    isWalkable(x, y) {
-        // Handle screen transitions
-        if (x < 0 || x >= this.screenWidth || 
-            y < 0 || y >= this.screenHeight) {
-            return true;
-        }
-
-        const HITBOX_RADIUS = 0.375; // Half of 0.75
-        const box = {
-            left: x - HITBOX_RADIUS,
-            right: x + HITBOX_RADIUS,
-            top: y - HITBOX_RADIUS,
-            bottom: y + HITBOX_RADIUS
-        };
-
-        // Debug logging for near-wall positions
-        console.log(`Player pos: (${x.toFixed(3)}, ${y.toFixed(3)})`);
-        console.log(`Box: t:${box.top.toFixed(3)} b:${box.bottom.toFixed(3)} l:${box.left.toFixed(3)} r:${box.right.toFixed(3)}`);
-
-        // Get overlapping tiles
-        const tiles = [
-            [Math.floor(box.left), Math.floor(box.top)],     // Top-left
-            [Math.floor(box.right), Math.floor(box.top)],    // Top-right
-            [Math.floor(box.left), Math.floor(box.bottom)],  // Bottom-left
-            [Math.floor(box.right), Math.floor(box.bottom)]  // Bottom-right
-        ];
-
-        // Check each potential tile and log if it's a wall
-        for (const [tileX, tileY] of tiles) {
-            if (tileX < 0 || tileX >= this.screenWidth || 
-                tileY < 0 || tileY >= this.screenHeight) {
-                continue;
-            }
-
-            const tile = this.getCurrentScreen().layout[tileY][tileX];
-            if (tile === TILE_TYPES.WALL || 
-                (tile === TILE_TYPES.DOOR && !this.hasKey)) {
-                console.log(`Collision at tile (${tileX}, ${tileY})`);
-                return false;
-            }
-        }
-        
-        return true;
     }
 
     getTile(x, y) {
@@ -243,18 +256,15 @@ export class WorldManager {
         const mapWidth = this.worldWidth * scale;
         const mapHeight = this.worldHeight * scale;
         
-        // Draw background
         ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
         ctx.fillRect(x, y, mapWidth, mapHeight);
         
-        // Draw visited screens
         this.worldGrid.forEach((row, screenY) => {
             row.forEach((screen, screenX) => {
                 if (screen.visited) {
-                    // Different colors for different screen states
                     ctx.fillStyle = screen.cleared ? 
-                        'rgba(0, 255, 0, 0.3)' : // Cleared rooms are green
-                        'rgba(255, 255, 255, 0.3)'; // Uncleared rooms are white
+                        'rgba(0, 255, 0, 0.3)' : 
+                        'rgba(255, 255, 255, 0.3)';
                     
                     ctx.fillRect(
                         x + screenX * scale,
@@ -266,7 +276,6 @@ export class WorldManager {
             });
         });
         
-        // Draw current screen
         ctx.fillStyle = 'white';
         ctx.fillRect(
             x + this.currentScreenX * scale,
@@ -279,7 +288,6 @@ export class WorldManager {
     drawScreen(ctx, resources) {
         const screen = this.getCurrentScreen();
         
-        // Draw tiles
         screen.layout.forEach((row, y) => {
             row.forEach((tile, x) => {
                 if (tile === TILE_TYPES.EMPTY) return;
@@ -301,7 +309,6 @@ export class WorldManager {
             });
         });
         
-        // Draw items
         const itemSheet = resources.images.items;
         screen.items.forEach(itemPos => {
             const [x, y] = itemPos.split(',').map(Number);
@@ -321,7 +328,6 @@ export class WorldManager {
             );
         });
         
-        // Draw enemies
         screen.enemies.forEach(enemy => {
             enemy.draw(ctx);
         });

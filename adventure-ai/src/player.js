@@ -1,17 +1,17 @@
 // player.js
 import { PLAYER_STATES, DIRECTIONS, PLAYER_SPEED, PLAYER_ATTACK_DURATION, 
-         PLAYER_HURT_DURATION, PLAYER_INVINCIBLE_DURATION, SPRITE_CONFIG } from './constants.js';
+         PLAYER_HURT_DURATION, PLAYER_INVINCIBLE_DURATION, SPRITE_CONFIG, TILE_TYPES } from './constants.js';
 
 export class Player {
-  constructor(x, y, resources, combatSystem) {
+  constructor(x, y, resources, combatSystem, worldManager) {
     this.x = x;
     this.y = y;
     this.tileX = Math.floor(x);
     this.tileY = Math.floor(y);
     this.resources = resources;
     this.combatSystem = combatSystem;
+    this.worldManager = worldManager;
     
-    // State
     this.state = PLAYER_STATES.IDLE;
     this.direction = DIRECTIONS.DOWN;
     this.health = 3;
@@ -23,29 +23,24 @@ export class Player {
       arrows: 0
     };
     
-    // Animation
     this.currentFrame = 0;
     this.frameTime = 0;
     this.stateTime = 0;
     this.invincibleTime = 0;
     this.isInvincible = false;
     
-    // Movement
     this.velocityX = 0;
     this.velocityY = 0;
     this.moving = false;
     
-    // Combat
     this.attackCooldown = 0;
     this.knockback = null;
-    this.width = 1;  // Collision box size in tiles
-    this.height = 1;
+    this.hitboxSize = 0.8;  // Slightly smaller than tile size
   }
 
   update(deltaTime, input) {
     this.stateTime += deltaTime;
     
-    // Update invincibility
     if (this.isInvincible) {
       this.invincibleTime += deltaTime;
       if (this.invincibleTime >= PLAYER_INVINCIBLE_DURATION) {
@@ -54,12 +49,10 @@ export class Player {
       }
     }
     
-    // Update attack cooldown
     if (this.attackCooldown > 0) {
       this.attackCooldown = Math.max(0, this.attackCooldown - deltaTime);
     }
     
-    // Handle knockback
     if (this.knockback) {
       this.x += this.knockback.x * deltaTime * 0.01;
       this.y += this.knockback.y * deltaTime * 0.01;
@@ -69,7 +62,6 @@ export class Player {
         this.knockback = null;
       }
       
-      // Update tile position even during knockback
       this.tileX = Math.floor(this.x);
       this.tileY = Math.floor(this.y);
       return;
@@ -102,35 +94,98 @@ export class Player {
   }
 
   handleMovement(deltaTime, input) {
-    this.velocityX = 0;
-    this.velocityY = 0;
+    let dx = 0;
+    let dy = 0;
     
     if (input.DPAD_LEFT.pressed) {
-      this.velocityX = -PLAYER_SPEED;
+      dx = -1;
       this.direction = DIRECTIONS.LEFT;
     } else if (input.DPAD_RIGHT.pressed) {
-      this.velocityX = PLAYER_SPEED;
+      dx = 1;
       this.direction = DIRECTIONS.RIGHT;
     }
     
     if (input.DPAD_UP.pressed) {
-      this.velocityY = -PLAYER_SPEED;
+      dy = -1;
       this.direction = DIRECTIONS.UP;
     } else if (input.DPAD_DOWN.pressed) {
-      this.velocityY = PLAYER_SPEED;
+      dy = 1;
       this.direction = DIRECTIONS.DOWN;
     }
-    
-    this.moving = this.velocityX !== 0 || this.velocityY !== 0;
-    this.state = this.moving ? PLAYER_STATES.WALKING : PLAYER_STATES.IDLE;
-    
-    // Update position
-    this.x += this.velocityX * deltaTime / 1000;
-    this.y += this.velocityY * deltaTime / 1000;
-    
-    // Update tile position
+
+    // Normalize diagonal movement
+    if (dx !== 0 && dy !== 0) {
+      const normalizer = Math.sqrt(0.5);
+      dx *= normalizer;
+      dy *= normalizer;
+    }
+
+    // Calculate new position with delta time
+    const newX = this.x + dx * PLAYER_SPEED * (deltaTime / 1000);
+    const newY = this.y + dy * PLAYER_SPEED * (deltaTime / 1000);
+
+    // Store current position for restoration if needed
+    const oldX = this.x;
+    const oldY = this.y;
+
+    // Try horizontal movement
+    if (dx !== 0) {
+      this.x = newX;
+      if (!this.isValidPosition()) {
+        this.x = oldX;
+      }
+    }
+
+    // Try vertical movement
+    if (dy !== 0) {
+      this.y = newY;
+      if (!this.isValidPosition()) {
+        this.y = oldY;
+      }
+    }
+
+    // Update tile position and movement state
     this.tileX = Math.floor(this.x);
     this.tileY = Math.floor(this.y);
+    this.moving = dx !== 0 || dy !== 0;
+    this.state = this.moving ? PLAYER_STATES.WALKING : PLAYER_STATES.IDLE;
+  }
+
+  isValidPosition() {
+    const hitbox = {
+      left: this.x - this.hitboxSize / 2,
+      right: this.x + this.hitboxSize / 2,
+      top: this.y - this.hitboxSize / 2,
+      bottom: this.y + this.hitboxSize / 2
+    };
+
+    // Get the tiles that the hitbox intersects with
+    const minTileX = Math.floor(hitbox.left);
+    const maxTileX = Math.ceil(hitbox.right);
+    const minTileY = Math.floor(hitbox.top);
+    const maxTileY = Math.ceil(hitbox.bottom);
+
+    // Check screen transitions
+    if (this.x < -0.45 || this.x > this.worldManager.screenWidth - 0.55 ||
+        this.y < -0.45 || this.y > this.worldManager.screenHeight - 0.55) {
+      return true;
+    }
+
+    // Check each tile for collision
+    for (let y = minTileY; y < maxTileY; y++) {
+      for (let x = minTileX; x < maxTileX; x++) {
+        if (x >= 0 && x < this.worldManager.screenWidth && 
+            y >= 0 && y < this.worldManager.screenHeight) {
+          const tile = this.worldManager.getTile(x, y);
+          if (tile === TILE_TYPES.WALL || 
+            (tile === TILE_TYPES.DOOR && !this.inventory.keys)) {
+            return false;
+          }
+        }
+      }
+    }
+
+    return true;
   }
 
   handleAttack(input) {
@@ -148,7 +203,6 @@ export class Player {
   }
 
   handleWeaponSwitch(input) {
-    // Switch between weapons with shoulder buttons if both are available
     if (this.inventory.sword && this.inventory.bow) {
       if (input.LEFT_SHOULDER.pressed) {
         this.currentWeapon = 'sword';
@@ -162,12 +216,9 @@ export class Player {
     this.state = PLAYER_STATES.ATTACKING;
     this.stateTime = 0;
     this.currentFrame = 0;
-    this.attackCooldown = PLAYER_ATTACK_DURATION + 100; // Add small buffer
+    this.attackCooldown = PLAYER_ATTACK_DURATION + 100;
     
-    // Create sword attack
     this.combatSystem.createAttack(this, 'sword');
-    
-    // Play sword sound
     this.resources.sounds.sword?.play();
   }
 
@@ -177,15 +228,10 @@ export class Player {
     this.state = PLAYER_STATES.ATTACKING;
     this.stateTime = 0;
     this.currentFrame = 0;
-    this.attackCooldown = PLAYER_ATTACK_DURATION + 200; // Longer cooldown for bow
+    this.attackCooldown = PLAYER_ATTACK_DURATION + 200;
     
-    // Create arrow attack
     this.combatSystem.createAttack(this, 'bow');
-    
-    // Consume arrow
     this.inventory.arrows--;
-    
-    // Play bow sound
     this.resources.sounds.bow?.play();
   }
 
@@ -198,7 +244,6 @@ export class Player {
     this.isInvincible = true;
     this.invincibleTime = 0;
     
-    // Play hurt sound
     this.resources.sounds.hurt?.play();
     
     if (this.health <= 0) {
@@ -207,7 +252,6 @@ export class Player {
   }
 
   die() {
-    // Handle player death (game over state)
     console.log('Player died');
   }
 
@@ -253,7 +297,7 @@ export class Player {
 
   draw(ctx) {
     if (this.isInvincible && Math.floor(this.invincibleTime / 100) % 2 === 0) {
-      return; // Skip drawing every other 100ms while invincible
+      return;
     }
     
     const sprite = this.resources.images.player;
@@ -261,7 +305,6 @@ export class Player {
     const animation = SPRITE_CONFIG.player.animations[this.state];
     const frame = animation.frames[this.currentFrame];
     
-    // Calculate source rectangle from sprite sheet
     const srcX = frame * frameConfig.frameWidth;
     const srcY = Object.values(DIRECTIONS).indexOf(this.direction) * frameConfig.frameHeight;
     
@@ -271,8 +314,8 @@ export class Player {
       srcY,
       frameConfig.frameWidth,
       frameConfig.frameHeight,
-      Math.floor(this.x * 32),
-      Math.floor(this.y * 32),
+      Math.floor(this.x * 32 - 16),  // Center the sprite on the position
+      Math.floor(this.y * 32 - 16),
       32,
       32
     );

@@ -1,6 +1,5 @@
 // constants.js
 
-// Game tile types
 export const TILE_TYPES = {
   EMPTY: ' ',
   WALL: 'x',
@@ -13,7 +12,6 @@ export const TILE_TYPES = {
   HEART: 'h'
 };
 
-// Movement directions
 export const DIRECTIONS = {
   UP: 'up',
   DOWN: 'down',
@@ -21,7 +19,6 @@ export const DIRECTIONS = {
   RIGHT: 'right'
 };
 
-// Color palette (based on NES limitations)
 export const COLORS = {
   black: '#000000',
   white: '#FFFFFF',
@@ -32,10 +29,9 @@ export const COLORS = {
   yellow: '#FFFF00',
   cyan: '#00FFFF',
   magenta: '#FF00FF',
-  tan: '#FCD8A8',
+  tan: '#FCD8A8'
 };
 
-// Sprite configurations for all game elements
 export const SPRITE_CONFIG = {
   tiles: {
     frameWidth: 32,
@@ -68,6 +64,14 @@ export const SPRITE_CONFIG = {
       walking: {
         frames: [0, 1],
         frameTime: 200
+      },
+      attacking: {
+        frames: [2],
+        frameTime: 0
+      },
+      hurt: {
+        frames: [3],
+        frameTime: 0
       }
     }
   },
@@ -91,13 +95,11 @@ export const SPRITE_CONFIG = {
   }
 };
 
-// Player movement and combat constants
-export const PLAYER_SPEED = 2.5; // Tiles per second
-export const PLAYER_ATTACK_DURATION = 250; // milliseconds
-export const PLAYER_HURT_DURATION = 500; // milliseconds
-export const PLAYER_INVINCIBLE_DURATION = 1000; // milliseconds
+export const PLAYER_SPEED = 5.0;
+export const PLAYER_ATTACK_DURATION = 250;
+export const PLAYER_HURT_DURATION = 500;
+export const PLAYER_INVINCIBLE_DURATION = 1000;
 
-// Player states
 export const PLAYER_STATES = {
   IDLE: 'idle',
   WALKING: 'walking',
@@ -105,17 +107,15 @@ export const PLAYER_STATES = {
   HURT: 'hurt'
 };
 
-// Game screen configuration
 export const SCREEN_CONFIG = {
   TILE_SIZE: 32,
   PLAY_AREA_WIDTH: 20,
   PLAY_AREA_HEIGHT: 12,
   STATUS_HEIGHT: 96,
-  TOTAL_WIDTH: 640, // 20 tiles * 32 pixels
-  TOTAL_HEIGHT: 480 // (12 tiles * 32 pixels) + 96 pixels status bar
+  TOTAL_WIDTH: 640,
+  TOTAL_HEIGHT: 480
 };
 
-// Status bar configuration
 export const STATUS_BAR = {
   height: 96,
   heartWidth: 24,
@@ -126,7 +126,6 @@ export const STATUS_BAR = {
   padding: 8
 };
 
-// Game states
 export const GAME_STATES = {
   LOADING: 'loading',
   PLAYING: 'playing',
@@ -134,7 +133,6 @@ export const GAME_STATES = {
   GAME_OVER: 'game_over'
 };
 
-// Screen transition configuration
 export const TRANSITION_CONFIG = {
   DURATION: 500,
   TYPES: {
@@ -144,7 +142,6 @@ export const TRANSITION_CONFIG = {
   }
 };
 
-// Debug configuration
 export const DEBUG_CONFIG = {
   SHOW_COLLISION: false,
   SHOW_GRID: false,
