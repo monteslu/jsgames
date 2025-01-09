@@ -77,10 +77,11 @@ window.addEventListener('keydown', (e) => {
 // Debug mode toggle (press D key)
 let debugMode = false;
 window.addEventListener('keydown', (e) => {
-  if (e.key.toLowerCase() === 'd') {
+  console.log('keydown', e, e.key);
+  if (e.key === 'd') {
     debugMode = !debugMode;
-    if (game) {
-      game.setDebugMode(debugMode);
-    }
+    // if (game) {
+    //   game.setDebugMode(debugMode);
+    // }
   }
 });

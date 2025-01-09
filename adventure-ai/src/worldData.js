@@ -1,5 +1,21 @@
 // worldData.js
 
+
+// x = impassable wall
+// w = water
+// b = bush
+// s = stairs
+// k = key
+// d = door
+// h = heart
+// p = potion
+// m = monster
+// l = ladder
+// f = fire
+// c = chest
+// t = treasure
+// e = empty
+
 export const WORLD_DATA = [
   // Row 0
   [
@@ -9,31 +25,31 @@ export const WORLD_DATA = [
         'x                  x',
         'x    k             x',
         'x   xxx            x',
-        'x                  x',
-        'x         s        x',
-        'x                  x',
+        'x                   ',
+        'x         s         ',
+        'x                   ',
         'x                  x',
         'x          xxx     x',
         'x           x      x',
         'x           x      x',
-        'xxxxxxxx  xxxxxxxxx',
+        'xxxxxxxx  xxxxxxxxxx',
       ],
       items: ['2,2', '5,5'] // Key and sword positions
     },
     {
       layout: [
-        'xxxxxxxxxxxxxxxxxxxx',
+        'xxxxxxxxx  xxxxxxxxx',
         'x                  x',
         'x                  x',
         'x    bbb           x',
         'x     b            x',
-        '      b            ',
-        'x     b            x',
+        '      b             ',
+        '      b             ',
         'x    bbb           x',
         'x                  x',
         'x                  x',
         'x                  x',
-        'xxxxxxxx  xxxxxxxxx',
+        'xxxxxxxx  xxxxxxxxxx',
       ],
       items: []
     },
@@ -43,13 +59,13 @@ export const WORLD_DATA = [
   [
     {
       layout: [
-        'xxxxxxxx  xxxxxxxxx',
+        'xxxxxxxx  xxxxxxxxxx',
         'x                  x',
         'x                  x',
         'x                  x',
         'x       wwwww      x',
-        'x      wwwwwww     x',
-        'x     wwwwwwwww    x',
+        '       wwwwwww      ',
+        '      wwwwwwwww     ',
         'x      wwwwwww     x',
         'x       wwwww      x',
         'x         h        x',
@@ -60,17 +76,17 @@ export const WORLD_DATA = [
     },
     {
       layout: [
-        'xxxxxxxx  xxxxxxxxx',
+        'xxxxxxxx  xxxxxxxxxx',
         'x                  x',
         'x                  x',
-        'x   wwwwwwwwwww   x',
-        'x   w         w   x',
-        'x   w    d    w   x',
-        'x   w         w   x',
-        'x   w         w   x',
-        'x   wwwww=wwwww   x',
+        'x   wwwwwwwwwww    x',
+        'x   w         w    x',
+        '    w    d    w    x',
+        '    w         w    x',
+        '    w         w    x',
+        'x   wwwww=wwwww    x',
         'x                  x',
-        'x        k        x',
+        'x        k         x',
         'xxxxxxxxxxxxxxxxxxxx',
       ],
       items: ['8,10'] // Key position
@@ -105,7 +121,7 @@ export function createEmptyScreen() {
 export function createPathwayScreen() {
   return {
     layout: [
-      'xxxxxxxx  xxxxxxxxx',
+      'xxxxxxxx  xxxxxxxxxx',
       'x                  x',
       'x                  x',
       'x                  x',
@@ -116,7 +132,7 @@ export function createPathwayScreen() {
       'x                  x',
       'x                  x',
       'x                  x',
-      'xxxxxxxx  xxxxxxxxx',
+      'xxxxxxxx  xxxxxxxxxx',
     ],
     items: []
   };

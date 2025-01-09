@@ -31,7 +31,8 @@ export const COLORS = {
   blue: '#0000FF',
   yellow: '#FFFF00',
   cyan: '#00FFFF',
-  magenta: '#FF00FF'
+  magenta: '#FF00FF',
+  tan: '#FCD8A8',
 };
 
 // Sprite configurations for all game elements
@@ -91,7 +92,7 @@ export const SPRITE_CONFIG = {
 };
 
 // Player movement and combat constants
-export const PLAYER_SPEED = 1.75; // Tiles per second
+export const PLAYER_SPEED = 2.5; // Tiles per second
 export const PLAYER_ATTACK_DURATION = 250; // milliseconds
 export const PLAYER_HURT_DURATION = 500; // milliseconds
 export const PLAYER_INVINCIBLE_DURATION = 1000; // milliseconds
