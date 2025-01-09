@@ -115,42 +115,105 @@ export class GameEngine {
   }
 
   drawTransition() {
-    if (!this.screenTransition) return;
+    const progress = this.transitionState.progress / this.transitionState.duration;
+    const direction = this.transitionState.direction;
     
-    // Calculate transition offsets based on direction
-    let currentX = 0;
-    let currentY = 0;
-    let nextX = 0;
-    let nextY = 0;
+    // Save original screen position
+    const savedX = this.worldManager.currentScreenX;
+    const savedY = this.worldManager.currentScreenY;
     
-    switch (this.transitionDirection) {
-      case 'right':
-        nextX = this.width * (1 - this.transitionProgress);
-        currentX = -this.width * this.transitionProgress;
+    // Set clip region to play area only
+    this.ctx.save();
+    this.ctx.beginPath();
+    this.ctx.rect(0, STATUS_BAR.height, this.canvas.width, this.canvas.height - STATUS_BAR.height);
+    this.ctx.clip();
+    
+    // Draw both screens based on direction
+    switch(direction) {
+      case 'right': {
+        const nextScreen = this.worldManager.getNextScreen('right');
+        // Current screen moving left
+        this.ctx.save();
+        this.ctx.translate(-this.canvas.width * progress, STATUS_BAR.height);
+        this.worldManager.drawScreen(this.ctx, this.resources);
+        this.ctx.restore();
+        
+        // Next screen coming from right
+        if (nextScreen) {
+          this.ctx.save();
+          this.ctx.translate(this.canvas.width * (1 - progress), STATUS_BAR.height);
+          this.worldManager.currentScreenX++;
+          this.worldManager.drawScreen(this.ctx, this.resources);
+          this.ctx.restore();
+        }
         break;
-      case 'left':
-        nextX = -this.width * (1 - this.transitionProgress);
-        currentX = this.width * this.transitionProgress;
+      }
+
+      case 'left': {
+        const nextScreen = this.worldManager.getNextScreen('left');
+        // Current screen moving right
+        this.ctx.save();
+        this.ctx.translate(this.canvas.width * progress, STATUS_BAR.height);
+        this.worldManager.drawScreen(this.ctx, this.resources);
+        this.ctx.restore();
+        
+        // Next screen coming from left
+        if (nextScreen) {
+          this.ctx.save();
+          this.ctx.translate(-this.canvas.width * (1 - progress), STATUS_BAR.height);
+          this.worldManager.currentScreenX--;
+          this.worldManager.drawScreen(this.ctx, this.resources);
+          this.ctx.restore();
+        }
         break;
-      case 'down':
-        nextY = this.height * (1 - this.transitionProgress);
-        currentY = -this.height * this.transitionProgress;
+      }
+
+      case 'down': {
+        const nextScreen = this.worldManager.getNextScreen('down');
+        const playAreaHeight = this.canvas.height - STATUS_BAR.height;
+        
+        // Current screen moving up
+        this.ctx.save();
+        this.ctx.translate(0, -playAreaHeight * progress + STATUS_BAR.height);
+        this.worldManager.drawScreen(this.ctx, this.resources);
+        this.ctx.restore();
+        
+        // Next screen coming from bottom
+        if (nextScreen) {
+          this.ctx.save();
+          this.ctx.translate(0, playAreaHeight * (1 - progress) + STATUS_BAR.height);
+          this.worldManager.currentScreenY++;
+          this.worldManager.drawScreen(this.ctx, this.resources);
+          this.ctx.restore();
+        }
         break;
-      case 'up':
-        nextY = -this.height * (1 - this.transitionProgress);
-        currentY = this.height * this.transitionProgress;
+      }
+
+      case 'up': {
+        const nextScreen = this.worldManager.getNextScreen('up');
+        const playAreaHeight = this.canvas.height - STATUS_BAR.height;
+        
+        // Current screen moving down
+        this.ctx.save();
+        this.ctx.translate(0, playAreaHeight * progress + STATUS_BAR.height);
+        this.worldManager.drawScreen(this.ctx, this.resources);
+        this.ctx.restore();
+        
+        // Next screen coming from top
+        if (nextScreen) {
+          this.ctx.save();
+          this.ctx.translate(0, -playAreaHeight * (1 - progress) + STATUS_BAR.height);
+          this.worldManager.currentScreenY--;
+          this.worldManager.drawScreen(this.ctx, this.resources);
+          this.ctx.restore();
+        }
         break;
+      }
     }
     
-    // Draw both screens
-    this.ctx.save();
-    this.ctx.translate(currentX, currentY);
-    this.drawScreen(this.currentScreen);
-    this.ctx.restore();
-    
-    this.ctx.save();
-    this.ctx.translate(nextX, nextY);
-    this.drawScreen(this.nextScreen);
+    // Restore original screen position and clip
+    this.worldManager.currentScreenX = savedX;
+    this.worldManager.currentScreenY = savedY;
     this.ctx.restore();
   }
 

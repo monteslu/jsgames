@@ -247,35 +247,39 @@ checkScreenTransitions() {
 
       case 'down': {
         const nextScreen = this.worldManager.getNextScreen('down');
+        const playAreaHeight = (this.canvas.height - STATUS_BAR.height);
+        
         // Current screen moving up
         this.ctx.save();
-        this.ctx.translate(0, -this.canvas.height * progress + STATUS_BAR.height);
+        this.ctx.translate(0, -playAreaHeight * progress + STATUS_BAR.height);
         this.worldManager.drawScreen(this.ctx, this.resources);
         this.ctx.restore();
         
         // Next screen coming from bottom
         if (nextScreen) {
           this.ctx.save();
-          this.ctx.translate(0, this.canvas.height * (1 - progress) + STATUS_BAR.height);
+          this.ctx.translate(0, STATUS_BAR.height + playAreaHeight * (1 - progress));
           this.worldManager.currentScreenY++;
           this.worldManager.drawScreen(this.ctx, this.resources);
           this.ctx.restore();
         }
         break;
       }
-
+      
       case 'up': {
         const nextScreen = this.worldManager.getNextScreen('up');
+        const playAreaHeight = (this.canvas.height - STATUS_BAR.height);
+        
         // Current screen moving down
         this.ctx.save();
-        this.ctx.translate(0, this.canvas.height * progress + STATUS_BAR.height);
+        this.ctx.translate(0, STATUS_BAR.height + playAreaHeight * progress);
         this.worldManager.drawScreen(this.ctx, this.resources);
         this.ctx.restore();
         
         // Next screen coming from top
         if (nextScreen) {
           this.ctx.save();
-          this.ctx.translate(0, -this.canvas.height * (1 - progress) + STATUS_BAR.height);
+          this.ctx.translate(0, STATUS_BAR.height - playAreaHeight * (1 - progress));
           this.worldManager.currentScreenY--;
           this.worldManager.drawScreen(this.ctx, this.resources);
           this.ctx.restore();
