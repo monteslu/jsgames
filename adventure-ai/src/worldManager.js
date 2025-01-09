@@ -40,7 +40,9 @@ export class WorldManager {
                         enemies: new Set(),
                         enemyData: screenData.enemies || [],
                         visited: false,
-                        cleared: false
+                        cleared: false,
+                        x: x,
+                        y: y
                     };
                     
                     if (screenData.enemies) {

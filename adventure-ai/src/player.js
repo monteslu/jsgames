@@ -35,7 +35,7 @@ export class Player {
     
     this.attackCooldown = 0;
     this.knockback = null;
-    this.hitboxSize = 0.8;  // Slightly smaller than tile size
+    this.hitboxSize = 0.5;  // Slightly smaller than tile size
   }
 
   update(deltaTime, input) {
@@ -308,6 +308,13 @@ export class Player {
     const srcX = frame * frameConfig.frameWidth;
     const srcY = Object.values(DIRECTIONS).indexOf(this.direction) * frameConfig.frameHeight;
     
+    ctx.strokeStyle = 'red';
+    ctx.strokeRect(
+      Math.floor(this.x * 32 - 16),  // Center the sprite on the position
+      Math.floor(this.y * 32 - 16),
+      32,
+      32
+    );
     ctx.drawImage(
       sprite,
       srcX,

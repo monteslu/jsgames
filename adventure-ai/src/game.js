@@ -2,7 +2,7 @@
 import { GameEngine } from './engine.js';
 import { Player } from './player.js';
 import { WorldManager } from './worldManager.js';
-import { STATUS_BAR, COLORS, GAME_STATES, TRANSITION_CONFIG } from './constants.js';
+import { STATUS_BAR, COLORS, GAME_STATES } from './constants.js';
 import { WORLD_DATA } from './worldData.js';
 import { playSound, getInput } from './utils.js';
 import { CombatSystem } from './combat.js';
@@ -14,20 +14,19 @@ export class Game extends GameEngine {
     this.worldManager = new WorldManager(this.combatSystem);
     this.player = null;
     this.gameState = GAME_STATES.LOADING;
-    this.transitionType = TRANSITION_CONFIG.TYPES.NONE;
+    this.transitionState = {
+      active: false,
+      direction: null,
+      progress: 0,
+      duration: 500
+    };
     this.init();
   }
 
   async init() {
     await super.init();
-    
-    // Load world data
     this.worldManager.loadWorld(WORLD_DATA);
-    
-    // Create player at starting position
     this.player = new Player(10, 6, this.resources, this.combatSystem, this.worldManager);
-    
-    // Start game loop
     this.lastTime = performance.now();
     this.gameState = GAME_STATES.PLAYING;
     this.gameLoop();
@@ -52,40 +51,28 @@ export class Game extends GameEngine {
 
   gameLoop() {
     const currentTime = performance.now();
-    const deltaTime = Math.min(currentTime - this.lastTime, 32); // Cap at ~30 FPS
-    
+    const deltaTime = Math.min(currentTime - this.lastTime, 32);
     this.update(deltaTime);
     this.draw();
-    
     this.lastTime = currentTime;
     requestAnimationFrame(() => this.gameLoop());
   }
 
   update(deltaTime) {
     if (this.gameState === GAME_STATES.PLAYING) {
-      const input = getInput()[0]; // Get first player's input
-      
-      // Update player first
+      const input = getInput()[0];
       const oldX = this.player.x;
       const oldY = this.player.y;
       this.player.update(deltaTime, input);
       
-      // Check collisions with world
       if (!this.worldManager.isWalkable(this.player.x, this.player.y)) {
         this.player.x = oldX;
         this.player.y = oldY;
       }
       
-      // Check screen transitions
       this.checkScreenTransitions();
-      
-      // Update combat system
       this.combatSystem.update(deltaTime, this.player, this.worldManager.getEnemies(), this.worldManager);
-      
-      // Update world (enemies, etc)
       this.worldManager.update(deltaTime, this.player);
-      
-      // Check item collection
       this.checkItemCollection();
     } else if (this.gameState === GAME_STATES.TRANSITIONING) {
       this.updateTransition(deltaTime);
@@ -97,7 +84,6 @@ export class Game extends GameEngine {
     let newPlayerX = this.player.x;
     let newPlayerY = this.player.y;
     
-    // Check horizontal transitions
     if (this.player.x < -0.45) {
       if (this.worldManager.getNextScreen('left')) {
         transitionDirection = 'left';
@@ -114,7 +100,6 @@ export class Game extends GameEngine {
       }
     }
     
-    // Check vertical transitions
     if (this.player.y < -0.45) {
       if (this.worldManager.getNextScreen('up')) {
         transitionDirection = 'up';
@@ -131,7 +116,6 @@ export class Game extends GameEngine {
       }
     }
     
-    // Start transition if needed
     if (transitionDirection) {
       this.startScreenTransition(transitionDirection);
       this.player.x = newPlayerX;
@@ -141,19 +125,22 @@ export class Game extends GameEngine {
 
   startScreenTransition(direction) {
     this.gameState = GAME_STATES.TRANSITIONING;
-    this.transitionDirection = direction;
-    this.transitionProgress = 0;
-    this.transitionType = TRANSITION_CONFIG.TYPES.SLIDE;
-    this.worldManager.changeScreen(direction);
+    this.transitionState = {
+      active: true,
+      direction: direction,
+      progress: 0,
+      duration: 500
+    };
   }
 
   updateTransition(deltaTime) {
-    this.transitionProgress += deltaTime / TRANSITION_CONFIG.DURATION;
+    this.transitionState.progress += deltaTime;
     
-    if (this.transitionProgress >= 1) {
+    if (this.transitionState.progress >= this.transitionState.duration) {
+      this.worldManager.changeScreen(this.transitionState.direction);
       this.gameState = GAME_STATES.PLAYING;
-      this.transitionProgress = 0;
-      this.transitionType = TRANSITION_CONFIG.TYPES.NONE;
+      this.transitionState.active = false;
+      this.transitionState.progress = 0;
     }
   }
 
@@ -173,76 +160,131 @@ export class Game extends GameEngine {
   }
 
   draw() {
-    // Clear the canvas
     this.ctx.fillStyle = COLORS.tan;
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     
+    // Draw status bar (always on top, no animation)
+    this.drawStatusBar();
+    
     if (this.gameState === GAME_STATES.PLAYING) {
-      this.drawGame();
+      this.drawPlayArea();
     } else if (this.gameState === GAME_STATES.TRANSITIONING) {
       this.drawTransition();
     }
   }
 
-  drawGame() {
-    // Draw status bar
-    this.drawStatusBar();
-    
-    // Set up transform for game area
+  drawPlayArea() {
     this.ctx.save();
     this.ctx.translate(0, STATUS_BAR.height);
-    
-    // Draw current screen
     this.worldManager.drawScreen(this.ctx, this.resources);
-    
-    // Draw combat effects
     this.combatSystem.draw(this.ctx);
-    
-    // Draw player
     this.player.draw(this.ctx);
-    
     this.ctx.restore();
   }
 
   drawTransition() {
-    const progress = this.transitionProgress;
+    const progress = this.transitionState.progress / this.transitionState.duration;
+    const direction = this.transitionState.direction;
     
-    // Calculate offset based on transition direction
-    let offsetX = 0;
-    let offsetY = STATUS_BAR.height;
+    // Save original screen position
+    const savedX = this.worldManager.currentScreenX;
+    const savedY = this.worldManager.currentScreenY;
     
-    switch (this.transitionDirection) {
-      case 'right':
-        offsetX = -this.canvas.width * progress;
+    // Set clip region to play area only
+    this.ctx.save();
+    this.ctx.beginPath();
+    this.ctx.rect(0, STATUS_BAR.height, this.canvas.width, this.canvas.height - STATUS_BAR.height);
+    this.ctx.clip();
+    
+    // Draw both screens based on direction
+    switch(direction) {
+      case 'right': {
+        const nextScreen = this.worldManager.getNextScreen('right');
+        // Current screen moving left
+        this.ctx.save();
+        this.ctx.translate(-this.canvas.width * progress, STATUS_BAR.height);
+        this.worldManager.drawScreen(this.ctx, this.resources);
+        this.ctx.restore();
+        
+        // Next screen coming from right
+        if (nextScreen) {
+          this.ctx.save();
+          this.ctx.translate(this.canvas.width * (1 - progress), STATUS_BAR.height);
+          this.worldManager.currentScreenX++;
+          this.worldManager.drawScreen(this.ctx, this.resources);
+          this.ctx.restore();
+        }
         break;
-      case 'left':
-        offsetX = this.canvas.width * progress;
+      }
+
+      case 'left': {
+        const nextScreen = this.worldManager.getNextScreen('left');
+        // Current screen moving right
+        this.ctx.save();
+        this.ctx.translate(this.canvas.width * progress, STATUS_BAR.height);
+        this.worldManager.drawScreen(this.ctx, this.resources);
+        this.ctx.restore();
+        
+        // Next screen coming from left
+        if (nextScreen) {
+          this.ctx.save();
+          this.ctx.translate(-this.canvas.width * (1 - progress), STATUS_BAR.height);
+          this.worldManager.currentScreenX--;
+          this.worldManager.drawScreen(this.ctx, this.resources);
+          this.ctx.restore();
+        }
         break;
-      case 'down':
-        offsetY = STATUS_BAR.height - (this.canvas.height - STATUS_BAR.height) * progress;
+      }
+
+      case 'down': {
+        const nextScreen = this.worldManager.getNextScreen('down');
+        // Current screen moving up
+        this.ctx.save();
+        this.ctx.translate(0, -this.canvas.height * progress + STATUS_BAR.height);
+        this.worldManager.drawScreen(this.ctx, this.resources);
+        this.ctx.restore();
+        
+        // Next screen coming from bottom
+        if (nextScreen) {
+          this.ctx.save();
+          this.ctx.translate(0, this.canvas.height * (1 - progress) + STATUS_BAR.height);
+          this.worldManager.currentScreenY++;
+          this.worldManager.drawScreen(this.ctx, this.resources);
+          this.ctx.restore();
+        }
         break;
-      case 'up':
-        offsetY = STATUS_BAR.height + (this.canvas.height - STATUS_BAR.height) * progress;
+      }
+
+      case 'up': {
+        const nextScreen = this.worldManager.getNextScreen('up');
+        // Current screen moving down
+        this.ctx.save();
+        this.ctx.translate(0, this.canvas.height * progress + STATUS_BAR.height);
+        this.worldManager.drawScreen(this.ctx, this.resources);
+        this.ctx.restore();
+        
+        // Next screen coming from top
+        if (nextScreen) {
+          this.ctx.save();
+          this.ctx.translate(0, -this.canvas.height * (1 - progress) + STATUS_BAR.height);
+          this.worldManager.currentScreenY--;
+          this.worldManager.drawScreen(this.ctx, this.resources);
+          this.ctx.restore();
+        }
         break;
+      }
     }
     
-    // Draw status bar (doesn't move during transition)
-    this.drawStatusBar();
-    
-    // Draw current screen with offset
-    this.ctx.save();
-    this.ctx.translate(offsetX, offsetY);
-    this.worldManager.drawScreen(this.ctx, this.resources);
-    this.player.draw(this.ctx);
+    // Restore original screen position and clip
+    this.worldManager.currentScreenX = savedX;
+    this.worldManager.currentScreenY = savedY;
     this.ctx.restore();
   }
 
   drawStatusBar() {
-    // Draw status bar background
     this.ctx.fillStyle = COLORS.black;
     this.ctx.fillRect(0, 0, this.canvas.width, STATUS_BAR.height);
     
-    // Draw hearts
     for (let i = 0; i < this.player.maxHealth; i++) {
       const filled = i < this.player.health;
       this.ctx.drawImage(
@@ -258,7 +300,6 @@ export class Game extends GameEngine {
       );
     }
     
-    // Draw current weapon
     if (this.player.inventory.sword) {
       this.ctx.drawImage(
         this.resources.images.items,
@@ -273,7 +314,6 @@ export class Game extends GameEngine {
       );
     }
     
-    // Draw key count
     if (this.player.inventory.keys > 0) {
       this.ctx.drawImage(
         this.resources.images.items,
@@ -297,7 +337,6 @@ export class Game extends GameEngine {
       );
     }
     
-    // Draw mini-map
     this.worldManager.drawMiniMap(
       this.ctx,
       this.canvas.width / 2 - (this.worldManager.worldWidth * STATUS_BAR.miniMapScale) / 2,
