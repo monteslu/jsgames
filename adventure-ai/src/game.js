@@ -79,40 +79,50 @@ export class Game extends GameEngine {
     }
   }
 
-  checkScreenTransitions() {
+// game.js
+checkScreenTransitions() {
     let transitionDirection = null;
     let newPlayerX = this.player.x;
     let newPlayerY = this.player.y;
     
-    if (this.player.x < -0.45) {
+    const hitboxHalf = this.player.hitboxSize / 2;
+    const transitionBuffer = 0.45;
+
+    // Left transition    
+    if (this.player.x - hitboxHalf < -transitionBuffer) {
       if (this.worldManager.getNextScreen('left')) {
         transitionDirection = 'left';
-        newPlayerX = this.worldManager.screenWidth - 0.55;
+        newPlayerX = this.worldManager.screenWidth - hitboxHalf - transitionBuffer;
       } else {
-        this.player.x = 0;
+        this.player.x = hitboxHalf + transitionBuffer;
       }
-    } else if (this.player.x > this.worldManager.screenWidth - 0.55) {
+    } 
+    // Right transition
+    else if (this.player.x + hitboxHalf > this.worldManager.screenWidth + transitionBuffer) {
       if (this.worldManager.getNextScreen('right')) {
         transitionDirection = 'right';
-        newPlayerX = 0;
+        newPlayerX = hitboxHalf + transitionBuffer;
       } else {
-        this.player.x = this.worldManager.screenWidth - 1;
+        this.player.x = this.worldManager.screenWidth - hitboxHalf - transitionBuffer;
       }
     }
     
-    if (this.player.y < -0.45) {
+    // Up transition
+    if (this.player.y - hitboxHalf < -transitionBuffer) {
       if (this.worldManager.getNextScreen('up')) {
         transitionDirection = 'up';
-        newPlayerY = this.worldManager.screenHeight - 0.55;
+        newPlayerY = this.worldManager.screenHeight - hitboxHalf - transitionBuffer;
       } else {
-        this.player.y = 0;
+        this.player.y = hitboxHalf + transitionBuffer;
       }
-    } else if (this.player.y > this.worldManager.screenHeight - 0.55) {
+    } 
+    // Down transition
+    else if (this.player.y + hitboxHalf > this.worldManager.screenHeight + transitionBuffer) {
       if (this.worldManager.getNextScreen('down')) {
         transitionDirection = 'down';
-        newPlayerY = 0;
+        newPlayerY = hitboxHalf + transitionBuffer;
       } else {
-        this.player.y = this.worldManager.screenHeight - 1;
+        this.player.y = this.worldManager.screenHeight - hitboxHalf - transitionBuffer;
       }
     }
     
@@ -122,7 +132,6 @@ export class Game extends GameEngine {
       this.player.y = newPlayerY;
     }
   }
-
   startScreenTransition(direction) {
     this.gameState = GAME_STATES.TRANSITIONING;
     this.transitionState = {

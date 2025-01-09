@@ -25,7 +25,7 @@ export const WORLD_DATA = [
         'x                  x',
         'x    k             x',
         'x   xxx            x',
-        'x                   ',
+        'x                  x',
         'x         s         ',
         'x                   ',
         'x                  x',

@@ -35,7 +35,7 @@ export class Player {
     
     this.attackCooldown = 0;
     this.knockback = null;
-    this.hitboxSize = 0.5;  // Slightly smaller than tile size
+    this.hitboxSize = 0.6;  // Collision hitbox size (in tiles)
   }
 
   update(deltaTime, input) {
@@ -152,40 +152,18 @@ export class Player {
   }
 
   isValidPosition() {
-    const hitbox = {
+    return this.worldManager.isWalkable(this.x, this.y, this.hitboxSize);
+  }
+
+  getHitbox() {
+    return {
       left: this.x - this.hitboxSize / 2,
       right: this.x + this.hitboxSize / 2,
       top: this.y - this.hitboxSize / 2,
-      bottom: this.y + this.hitboxSize / 2
+      bottom: this.y + this.hitboxSize / 2,
+      width: this.hitboxSize,
+      height: this.hitboxSize
     };
-
-    // Get the tiles that the hitbox intersects with
-    const minTileX = Math.floor(hitbox.left);
-    const maxTileX = Math.ceil(hitbox.right);
-    const minTileY = Math.floor(hitbox.top);
-    const maxTileY = Math.ceil(hitbox.bottom);
-
-    // Check screen transitions
-    if (this.x < -0.45 || this.x > this.worldManager.screenWidth - 0.55 ||
-        this.y < -0.45 || this.y > this.worldManager.screenHeight - 0.55) {
-      return true;
-    }
-
-    // Check each tile for collision
-    for (let y = minTileY; y < maxTileY; y++) {
-      for (let x = minTileX; x < maxTileX; x++) {
-        if (x >= 0 && x < this.worldManager.screenWidth && 
-            y >= 0 && y < this.worldManager.screenHeight) {
-          const tile = this.worldManager.getTile(x, y);
-          if (tile === TILE_TYPES.WALL || 
-            (tile === TILE_TYPES.DOOR && !this.inventory.keys)) {
-            return false;
-          }
-        }
-      }
-    }
-
-    return true;
   }
 
   handleAttack(input) {
@@ -308,20 +286,24 @@ export class Player {
     const srcX = frame * frameConfig.frameWidth;
     const srcY = Object.values(DIRECTIONS).indexOf(this.direction) * frameConfig.frameHeight;
     
-    ctx.strokeStyle = 'red';
-    ctx.strokeRect(
-      Math.floor(this.x * 32 - 16),  // Center the sprite on the position
-      Math.floor(this.y * 32 - 16),
-      32,
-      32
-    );
+    // Draw hitbox using the same calculation as collision detection
+    // const hitbox = this.getHitbox();
+    // ctx.strokeStyle = 'red';
+    // ctx.strokeRect(
+    //   hitbox.left * 32,
+    //   hitbox.top * 32,
+    //   hitbox.width * 32,
+    //   hitbox.height * 32
+    // );
+
+    // Draw sprite centered on position
     ctx.drawImage(
       sprite,
       srcX,
       srcY,
       frameConfig.frameWidth,
       frameConfig.frameHeight,
-      Math.floor(this.x * 32 - 16),  // Center the sprite on the position
+      Math.floor(this.x * 32 - 16),
       Math.floor(this.y * 32 - 16),
       32,
       32

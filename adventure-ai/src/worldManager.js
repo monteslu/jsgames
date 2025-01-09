@@ -142,36 +142,57 @@ export class WorldManager {
         return success;
     }
 
-    isWalkable(x, y) {
-        // Convert float coordinates to tile coordinates
+// worldManager.js
+isWalkable(x, y, hitboxSize) {
+    const TRANSITION_BUFFER = 0.45;
+
+    // Create hitbox relative to the center point
+    const hitbox = {
+        left: x - hitboxSize / 2,
+        right: x + hitboxSize / 2,
+        top: y - hitboxSize / 2,
+        bottom: y + hitboxSize / 2
+    };
+
+    // Check screen transitions
+    if (hitbox.left < -TRANSITION_BUFFER || 
+        hitbox.right > this.screenWidth + TRANSITION_BUFFER ||
+        hitbox.top < -TRANSITION_BUFFER ||
+        hitbox.bottom > this.screenHeight + TRANSITION_BUFFER) {
+
+        // Get the next screen in the appropriate direction
+        let nextScreen = null;
+        if (hitbox.left < -TRANSITION_BUFFER) nextScreen = this.getNextScreen('left');
+        if (hitbox.right > this.screenWidth + TRANSITION_BUFFER) nextScreen = this.getNextScreen('right');
+        if (hitbox.top < -TRANSITION_BUFFER) nextScreen = this.getNextScreen('up');
+        if (hitbox.bottom > this.screenHeight + TRANSITION_BUFFER) nextScreen = this.getNextScreen('down');
+
+        // If there's no next screen, block the transition
+        if (!nextScreen) return false;
+
+        // Check if the tile at transition point is walkable
         const tileX = Math.floor(x);
         const tileY = Math.floor(y);
+        let tile = null;
 
-        // Check screen boundaries with margin for transitions
-        if (x < -0.45 || x > this.screenWidth - 0.55 || 
-            y < -0.45 || y > this.screenHeight - 0.55) {
-            return true; // Allow movement for screen transitions
+        // Get tile based on which boundary we're crossing
+        if (tileX >= 0 && tileX < this.screenWidth && tileY >= 0 && tileY < this.screenHeight) {
+            tile = this.getCurrentScreen().layout[tileY][tileX];
+            if (tile === TILE_TYPES.WALL) return false;
         }
 
-        // Get the 4 surrounding tiles for collision check
-        const tiles = [
-            [tileX, tileY],             // Current tile
-            [tileX + 1, tileY],         // Right tile
-            [tileX, tileY + 1],         // Bottom tile
-            [tileX + 1, tileY + 1]      // Bottom-right tile
-        ];
+        return true;
+    }
 
-        // Check hitbox against each relevant tile
-        const HITBOX_SIZE = 0.8;  // Slightly smaller than 1 tile
-        const playerBox = {
-            left: x - HITBOX_SIZE / 2,
-            right: x + HITBOX_SIZE / 2,
-            top: y - HITBOX_SIZE / 2,
-            bottom: y + HITBOX_SIZE / 2
-        };
+    // Get the tiles that intersect with the hitbox
+    const minTileX = Math.floor(hitbox.left);
+    const maxTileX = Math.ceil(hitbox.right);
+    const minTileY = Math.floor(hitbox.top);
+    const maxTileY = Math.ceil(hitbox.bottom);
 
-        // Check each tile that the hitbox might intersect
-        for (const [checkX, checkY] of tiles) {
+    // Check each tile for collision
+    for (let checkY = minTileY; checkY < maxTileY; checkY++) {
+        for (let checkX = minTileX; checkX < maxTileX; checkX++) {
             // Skip tiles outside the screen
             if (checkX < 0 || checkX >= this.screenWidth || 
                 checkY < 0 || checkY >= this.screenHeight) {
@@ -181,23 +202,13 @@ export class WorldManager {
             const tile = this.getCurrentScreen().layout[checkY][checkX];
             if (tile === TILE_TYPES.WALL || 
                 (tile === TILE_TYPES.DOOR && !this.hasKey)) {
-                // Create tile collision box
-                const tileBox = {
-                    left: checkX,
-                    right: checkX + 1,
-                    top: checkY,
-                    bottom: checkY + 1
-                };
-
-                // Check for intersection
-                if (this.boxesIntersect(playerBox, tileBox)) {
-                    return false;
-                }
+                return false;
             }
         }
-        
-        return true;
     }
+    
+    return true;
+}
 
     boxesIntersect(a, b) {
         return !(
