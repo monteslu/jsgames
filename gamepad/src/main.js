@@ -125,10 +125,27 @@ let buttonSize;
 let gps;
 let btnRadius;
 let axisRadius;
+let closing = false;
 function draw() {
   const [p1] = getInput();
   ctx.fillStyle = 'blue';
+  if (p1?.START?.pressed && p1?.SELECT?.pressed) {
+    closing = true;
+    setTimeout(() => {
+      window.close();
+    }, 2000);
+  }
+  if (closing) {
+    ctx.fillStyle = 'red';
+    ctx.fillRect(0, 0, width, height);
+    ctx.fillStyle = 'white';
+    ctx.font = `${buttonSize}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.fillText('START + SELECT pressed to close...', width / 2, height / 2);
+    return;
+  }
   ctx.fillRect(0, 0, width, height);
+  
   ctx.drawImage(gamepadImg, 0, 0, gamepadWidth, gamepadHeight);
   if (p1.gp) {
     ctx.fillStyle = 'yellow';
