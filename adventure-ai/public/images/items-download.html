@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Items Sprite Sheet Download</title>
+    <style>
+        body {
+            background: #1a1a1a;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        svg {
+            background: black;
+            border: 2px solid #3a3a3a;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Items Sprite Sheet</h1>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 32" width="512" height="128">
+            <!-- Background -->
+            <rect width="128" height="32" fill="#000"/>
+            
+            <!-- Key (index 0) -->
+            <g transform="translate(0,0)">
+                <!-- Key head -->
+                <circle cx="10" cy="16" r="6" fill="#FFFF00"/>
+                <circle cx="10" cy="16" r="3" fill="#000"/>
+                <!-- Key shaft -->
+                <rect x="16" y="14" width="12" height="4" fill="#FFFF00"/>
+                <!-- Key teeth -->
+                <rect x="20" y="18" width="2" height="4" fill="#FFFF00"/>
+                <rect x="24" y="18" width="2" height="6" fill="#FFFF00"/>
+            </g>
+            
+            <!-- Sword (index 1) -->
+            <g transform="translate(32,0)">
+                <!-- Blade -->
+                <rect x="14" y="4" width="4" height="20" fill="#FFFFFF"/>
+                <!-- Handle -->
+                <rect x="12" y="24" width="8" height="4" fill="#FFFF00"/>
+                <!-- Guard -->
+                <rect x="10" y="20" width="12" height="4" fill="#FFFF00"/>
+            </g>
+            
+            <!-- Full Heart (index 2) -->
+            <g transform="translate(64,0)">
+                <path d="M16 8 L24 8 L28 12 L28 16 L16 28 L4 16 L4 12 L8 8 L16 8" fill="#FF0000"/>
+            </g>
+            
+            <!-- Empty Heart (index 3) -->
+            <g transform="translate(96,0)">
+                <path d="M16 8 L24 8 L28 12 L28 16 L16 28 L4 16 L4 12 L8 8 L16 8" fill="#7C7C7C"/>
+            </g>
+        </svg>
+        <button onclick="downloadPNG()">Download items.png</button>
+    </div>
+
+    <script>
+        function downloadPNG() {
+            const svg = document.querySelector('svg');
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas size to match sprite sheet dimensions
+            canvas.width = 128;
+            canvas.height = 32;
+            
+            // Create image from SVG
+            const img = new Image();
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+            const url = URL.createObjectURL(svgBlob);
+            
+            img.onload = function() {
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                const link = document.createElement('a');
+                link.download = 'items.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                URL.revokeObjectURL(url);
+            };
+            
+            img.src = url;
+        }
+    </script>
+</body>
+</html>
