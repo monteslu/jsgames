@@ -5,12 +5,12 @@ export const TILE_TYPES = {
   WALL: 'x',
   DOOR: 'd',
   BUSH: 'b',
-  WATER: 'w',
+  WATER: 'w',  // This stays as 'w'
   BRIDGE: '=',
   KEY: 'k',
   SWORD: 's',
   HEART: 'h',
-  BOW: 'w',
+  BOW: 'B',    // Changed from 'w' to 'B' to avoid conflict with WATER
   ARROW: 'a'
 };
 
@@ -49,7 +49,7 @@ export const SPRITE_CONFIG = {
       [TILE_TYPES.WALL]: 0,
       [TILE_TYPES.DOOR]: 1,
       [TILE_TYPES.BUSH]: 2,
-      [TILE_TYPES.WATER]: 3,
+      [TILE_TYPES.WATER]: 3,    // Water is the fourth image (index 3)
       [TILE_TYPES.BRIDGE]: 4
     }
   },
@@ -58,7 +58,7 @@ export const SPRITE_CONFIG = {
     frameHeight: 32,
     mapping: {
       [TILE_TYPES.KEY]: 0,
-      [TILE_TYPES.SWORD]: 1,   // Sword is the second sprite in the items sheet
+      [TILE_TYPES.SWORD]: 1,
       [TILE_TYPES.HEART]: 2,
       [TILE_TYPES.BOW]: 3,
       [TILE_TYPES.ARROW]: 4

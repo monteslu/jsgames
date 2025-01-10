@@ -1,21 +1,6 @@
 // worldData.js
 import { COLORS } from './constants.js';
 
-// x = impassable wall
-// w = water
-// b = bush
-// s = sword
-// k = key
-// d = door
-// h = heart
-// p = potion
-// m = monster
-// l = ladder
-// f = fire
-// c = chest
-// t = treasure
-// e = empty
-
 export const WORLD_DATA = [
   // Row 0
   [

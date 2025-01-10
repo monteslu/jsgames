@@ -185,7 +185,11 @@ export class WorldManager {
             const tileY = Math.floor(y);
             if (tileX >= 0 && tileX < this.screenWidth && tileY >= 0 && tileY < this.screenHeight) {
                 const tile = this.getCurrentScreen().layout[tileY][tileX];
-                if (tile === TILE_TYPES.WALL) return false;
+                if (tile === TILE_TYPES.WALL || 
+                    tile === TILE_TYPES.WATER || // Add water as impassable
+                    (tile === TILE_TYPES.DOOR && !this.hasKey)) {
+                    return false;
+                }
             }
 
             return true;
@@ -204,8 +208,12 @@ export class WorldManager {
                 }
 
                 const tile = this.getCurrentScreen().layout[checkY][checkX];
+                const nextTile = checkY + 1 < this.screenHeight ? this.getCurrentScreen().layout[checkY + 1][checkX] : null;
+
+                // Check if the tile is impassable
                 if (tile === TILE_TYPES.WALL || 
-                    (tile === TILE_TYPES.DOOR && !this.hasKey)) {
+                    (tile === TILE_TYPES.DOOR && !this.hasKey) ||
+                    (tile === TILE_TYPES.WATER && nextTile !== TILE_TYPES.BRIDGE)) { // Allow walking on water only if there's a bridge
                     return false;
                 }
             }
