@@ -45,6 +45,7 @@ async function loadAssets() {
     resources.addSound('sword', 'sounds/sword.mp3');
     resources.addSound('item', 'sounds/item.mp3');
     resources.addSound('hurt', 'sounds/hurt.mp3');
+    resources.addSound('death', 'sounds/sad-trumpet.mp3');  // Add death sound
     
     // Wait for all resources to load
     await resources.load();
@@ -73,4 +74,3 @@ window.addEventListener('keydown', (e) => {
     e.preventDefault();
   }
 });
-

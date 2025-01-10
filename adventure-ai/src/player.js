@@ -7,6 +7,10 @@ export class Player {
   constructor(x, y, resources, combatSystem, worldManager) {
     this.x = x;
     this.y = y;
+    this.initialX = x;  // Store initial position for respawn
+    this.initialY = y;
+    this.initialScreenX = worldManager.currentScreenX;  // Store initial screen for respawn
+    this.initialScreenY = worldManager.currentScreenY;
     this.tileX = Math.floor(x);
     this.tileY = Math.floor(y);
     this.resources = resources;
@@ -246,7 +250,26 @@ export class Player {
   }
 
   die() {
-    console.log('Player died');
+    // Play death sound
+    playSound(this.resources.sounds.death);
+    
+    // Reset player position to starting point and screen
+    this.worldManager.currentScreenX = this.initialScreenX;
+    this.worldManager.currentScreenY = this.initialScreenY;
+    this.x = this.initialX;
+    this.y = this.initialY;
+    this.tileX = Math.floor(this.x);
+    this.tileY = Math.floor(this.y);
+    
+    // Restore full health
+    this.health = this.maxHealth;
+    
+    // Reset state
+    this.state = PLAYER_STATES.IDLE;
+    this.stateTime = 0;
+    this.isInvincible = true;  // Brief invincibility after respawn
+    this.invincibleTime = 0;
+    this.knockback = null;
   }
 
   updateAnimation(deltaTime) {
