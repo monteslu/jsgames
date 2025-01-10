@@ -1,5 +1,6 @@
 // combat.js
 import { DIRECTIONS, PLAYER_STATES } from './constants.js';
+import { playSound } from './utils.js';
 
 export class CombatSystem {
   constructor(resources) {
@@ -17,17 +18,19 @@ export class CombatSystem {
         continue;
       }
       
-      // Move attack
-      attack.x += attack.dx * attack.speed * deltaTime;
-      attack.y += attack.dy * attack.speed * deltaTime;
+      // Move attack if it's a projectile
+      if (attack.type === 'projectile') {
+        attack.x += attack.dx * attack.speed * deltaTime;
+        attack.y += attack.dy * attack.speed * deltaTime;
+      }
       
       // Check collisions with enemies
       for (const enemy of enemies) {
         if (this.checkCollision(attack, enemy)) {
           // Calculate knockback direction
           const knockback = {
-            x: attack.dx,
-            y: attack.dy
+            x: attack.dx * 0.2,  // Reduced knockback for better control
+            y: attack.dy * 0.2
           };
           
           // Apply damage and knockback
@@ -42,12 +45,12 @@ export class CombatSystem {
           this.createHitParticles(attack.x, attack.y);
           
           // Play hit sound
-          this.resources.sounds.hit?.play();
+          playSound(this.resources.sounds.hit);
         }
       }
       
-      // Check collision with walls
-      if (!worldManager.isWalkable(attack.x, attack.y)) {
+      // Check collision with walls for projectiles
+      if (attack.type === 'projectile' && !worldManager.isWalkable(attack.x, attack.y)) {
         this.attacks.delete(attack);
         this.createHitParticles(attack.x, attack.y);
       }
@@ -69,8 +72,17 @@ export class CombatSystem {
     // Check for enemy collisions with player
     if (player.state !== PLAYER_STATES.HURT) {
       for (const enemy of enemies) {
+        // Update enemy cooldown
+        if (enemy.attackCooldown > 0) {
+          enemy.attackCooldown = Math.max(0, enemy.attackCooldown - deltaTime);
+          continue;
+        }
+
         if (this.checkCollision(player, enemy)) {
           player.hurt(enemy.damage);
+          
+          // Set attack cooldown
+          enemy.attackCooldown = enemy.attackCooldownDuration;
           
           // Knockback direction from enemy
           const dx = player.x - enemy.x;
@@ -79,9 +91,9 @@ export class CombatSystem {
           
           if (dist > 0) {
             player.knockback = {
-              x: (dx / dist) * 2,
-              y: (dy / dist) * 2,
-              duration: 200
+              x: (dx / dist) * 0.15,  // Reduced knockback force
+              y: (dy / dist) * 0.15,
+              duration: 100  // Short knockback duration
             };
           }
         }
@@ -104,7 +116,7 @@ export class CombatSystem {
     if (attack) {
       this.attacks.add(attack);
       // Play attack sound
-      this.resources.sounds[type]?.play();
+      playSound(this.resources.sounds[type]);
     }
   }
 
@@ -120,14 +132,14 @@ export class CombatSystem {
     
     return {
       type: 'melee',
-      x: player.x + vector.dx,
-      y: player.y + vector.dy,
+      x: player.x + vector.dx * 0.7,  // Position sword hitbox closer to player
+      y: player.y + vector.dy * 0.7,
       dx: vector.dx,
       dy: vector.dy,
-      width: 1,
-      height: 1,
+      width: 1.2,  // Slightly larger hitbox for better hit detection
+      height: 1.2,
       damage: 1,
-      lifetime: 200,
+      lifetime: 200,  // Short lifetime for quick attacks
       speed: 0
     };
   }
@@ -157,8 +169,9 @@ export class CombatSystem {
   }
 
   createHitParticles(x, y) {
-    for (let i = 0; i < 8; i++) {
-      const angle = (Math.PI * 2 * i) / 8;
+    const particleCount = 8;
+    for (let i = 0; i < particleCount; i++) {
+      const angle = (Math.PI * 2 * i) / particleCount;
       this.particles.add({
         x,
         y,
@@ -195,24 +208,29 @@ export class CombatSystem {
   draw(ctx) {
     // Draw attacks
     for (const attack of this.attacks) {
-      ctx.fillStyle = attack.type === 'melee' ? '#fff' : '#ff0';
-      ctx.fillRect(
-        Math.floor(attack.x * 32),
-        Math.floor(attack.y * 32),
-        Math.floor(attack.width * 32),
-        Math.floor(attack.height * 32)
-      );
+      // Only draw projectile attacks - melee attacks are shown by player animation
+      if (attack.type === 'projectile') {
+        ctx.fillStyle = '#ff0';
+        ctx.fillRect(
+          Math.floor((attack.x - attack.width/2) * 32),
+          Math.floor((attack.y - attack.height/2) * 32),
+          Math.floor(attack.width * 32),
+          Math.floor(attack.height * 32)
+        );
+      }
     }
     
     // Draw particles
     for (const particle of this.particles) {
       ctx.fillStyle = particle.color;
+      ctx.globalAlpha = particle.lifetime / particle.initialLifetime;
       ctx.fillRect(
-        Math.floor(particle.x * 32 - particle.size / 2),
-        Math.floor(particle.y * 32 - particle.size / 2),
+        Math.floor(particle.x * 32 - particle.size/2),
+        Math.floor(particle.y * 32 - particle.size/2),
         Math.floor(particle.size),
         Math.floor(particle.size)
       );
+      ctx.globalAlpha = 1;
     }
   }
 }

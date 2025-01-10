@@ -1,11 +1,11 @@
 // worldManager.js
-import { TILE_TYPES, SPRITE_CONFIG } from './constants.js';
+import { TILE_TYPES, SPRITE_CONFIG, COLORS, STATUS_BAR } from './constants.js';
 import { Enemy } from './enemy.js';
 
 export class WorldManager {
     constructor(combatSystem) {
-        this.worldWidth = 10;
-        this.worldHeight = 10;
+        this.worldWidth = 20;
+        this.worldHeight = 13;
         this.screenWidth = 20;
         this.screenHeight = 12;
         this.currentScreenX = 0;
@@ -142,81 +142,59 @@ export class WorldManager {
         return success;
     }
 
-// worldManager.js
-isWalkable(x, y, hitboxSize) {
-    const TRANSITION_BUFFER = 0.45;
+    isWalkable(x, y, hitboxSize = 0.5) {
+        const TRANSITION_BUFFER = 0.45;
+        const hitbox = {
+            left: x - hitboxSize / 2,
+            right: x + hitboxSize / 2,
+            top: y - hitboxSize / 2,
+            bottom: y + hitboxSize / 2
+        };
 
-    // Create hitbox relative to the center point
-    const hitbox = {
-        left: x - hitboxSize / 2,
-        right: x + hitboxSize / 2,
-        top: y - hitboxSize / 2,
-        bottom: y + hitboxSize / 2
-    };
+        if (hitbox.left < -TRANSITION_BUFFER || 
+            hitbox.right > this.screenWidth + TRANSITION_BUFFER ||
+            hitbox.top < -TRANSITION_BUFFER ||
+            hitbox.bottom > this.screenHeight + TRANSITION_BUFFER) {
 
-    // Check screen transitions
-    if (hitbox.left < -TRANSITION_BUFFER || 
-        hitbox.right > this.screenWidth + TRANSITION_BUFFER ||
-        hitbox.top < -TRANSITION_BUFFER ||
-        hitbox.bottom > this.screenHeight + TRANSITION_BUFFER) {
+            let nextScreen = null;
+            if (hitbox.left < -TRANSITION_BUFFER) nextScreen = this.getNextScreen('left');
+            if (hitbox.right > this.screenWidth + TRANSITION_BUFFER) nextScreen = this.getNextScreen('right');
+            if (hitbox.top < -TRANSITION_BUFFER) nextScreen = this.getNextScreen('up');
+            if (hitbox.bottom > this.screenHeight + TRANSITION_BUFFER) nextScreen = this.getNextScreen('down');
 
-        // Get the next screen in the appropriate direction
-        let nextScreen = null;
-        if (hitbox.left < -TRANSITION_BUFFER) nextScreen = this.getNextScreen('left');
-        if (hitbox.right > this.screenWidth + TRANSITION_BUFFER) nextScreen = this.getNextScreen('right');
-        if (hitbox.top < -TRANSITION_BUFFER) nextScreen = this.getNextScreen('up');
-        if (hitbox.bottom > this.screenHeight + TRANSITION_BUFFER) nextScreen = this.getNextScreen('down');
+            if (!nextScreen) return false;
 
-        // If there's no next screen, block the transition
-        if (!nextScreen) return false;
+            const tileX = Math.floor(x);
+            const tileY = Math.floor(y);
+            if (tileX >= 0 && tileX < this.screenWidth && tileY >= 0 && tileY < this.screenHeight) {
+                const tile = this.getCurrentScreen().layout[tileY][tileX];
+                if (tile === TILE_TYPES.WALL) return false;
+            }
 
-        // Check if the tile at transition point is walkable
-        const tileX = Math.floor(x);
-        const tileY = Math.floor(y);
-        let tile = null;
-
-        // Get tile based on which boundary we're crossing
-        if (tileX >= 0 && tileX < this.screenWidth && tileY >= 0 && tileY < this.screenHeight) {
-            tile = this.getCurrentScreen().layout[tileY][tileX];
-            if (tile === TILE_TYPES.WALL) return false;
+            return true;
         }
 
+        const minTileX = Math.floor(hitbox.left);
+        const maxTileX = Math.ceil(hitbox.right);
+        const minTileY = Math.floor(hitbox.top);
+        const maxTileY = Math.ceil(hitbox.bottom);
+
+        for (let checkY = minTileY; checkY < maxTileY; checkY++) {
+            for (let checkX = minTileX; checkX < maxTileX; checkX++) {
+                if (checkX < 0 || checkX >= this.screenWidth || 
+                    checkY < 0 || checkY >= this.screenHeight) {
+                    continue;
+                }
+
+                const tile = this.getCurrentScreen().layout[checkY][checkX];
+                if (tile === TILE_TYPES.WALL || 
+                    (tile === TILE_TYPES.DOOR && !this.hasKey)) {
+                    return false;
+                }
+            }
+        }
+        
         return true;
-    }
-
-    // Get the tiles that intersect with the hitbox
-    const minTileX = Math.floor(hitbox.left);
-    const maxTileX = Math.ceil(hitbox.right);
-    const minTileY = Math.floor(hitbox.top);
-    const maxTileY = Math.ceil(hitbox.bottom);
-
-    // Check each tile for collision
-    for (let checkY = minTileY; checkY < maxTileY; checkY++) {
-        for (let checkX = minTileX; checkX < maxTileX; checkX++) {
-            // Skip tiles outside the screen
-            if (checkX < 0 || checkX >= this.screenWidth || 
-                checkY < 0 || checkY >= this.screenHeight) {
-                continue;
-            }
-
-            const tile = this.getCurrentScreen().layout[checkY][checkX];
-            if (tile === TILE_TYPES.WALL || 
-                (tile === TILE_TYPES.DOOR && !this.hasKey)) {
-                return false;
-            }
-        }
-    }
-    
-    return true;
-}
-
-    boxesIntersect(a, b) {
-        return !(
-            a.right < b.left ||
-            a.left > b.right ||
-            a.bottom < b.top ||
-            a.top > b.bottom
-        );
     }
 
     update(deltaTime, player) {
@@ -265,36 +243,40 @@ isWalkable(x, y, hitboxSize) {
         return false;
     }
 
-    drawMiniMap(ctx, x, y, scale) {
-        const mapWidth = this.worldWidth * scale;
-        const mapHeight = this.worldHeight * scale;
+    drawMiniMap(ctx, x, y) {
+        const { screenWidth, screenHeight } = STATUS_BAR.miniMap;
         
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-        ctx.fillRect(x, y, mapWidth, mapHeight);
+        // Calculate total minimap dimensions
+        const minimapWidth = this.worldWidth * screenWidth;
+        const minimapHeight = this.worldHeight * screenHeight;
         
+        // Draw background (unexplored area)
+        ctx.fillStyle = COLORS.minimap.unexplored;
+        ctx.fillRect(x, y, minimapWidth, minimapHeight);
+        
+        // Draw each screen
         this.worldGrid.forEach((row, screenY) => {
             row.forEach((screen, screenX) => {
                 if (screen.visited) {
-                    ctx.fillStyle = screen.cleared ? 
-                        'rgba(0, 255, 0, 0.3)' : 
-                        'rgba(255, 255, 255, 0.3)';
-                    
+                    // Draw explored rooms in playable area color
+                    ctx.fillStyle = COLORS.minimap.explored;
                     ctx.fillRect(
-                        x + screenX * scale,
-                        y + screenY * scale,
-                        scale,
-                        scale
+                        x + screenX * screenWidth,
+                        y + screenY * screenHeight,
+                        screenWidth,
+                        screenHeight
                     );
                 }
             });
         });
         
-        ctx.fillStyle = 'white';
+        // Draw current screen indicator
+        ctx.fillStyle = COLORS.minimap.current;
         ctx.fillRect(
-            x + this.currentScreenX * scale,
-            y + this.currentScreenY * scale,
-            scale,
-            scale
+            x + this.currentScreenX * screenWidth,
+            y + this.currentScreenY * screenHeight,
+            screenWidth,
+            screenHeight
         );
     }
 

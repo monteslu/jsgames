@@ -34,7 +34,7 @@ export const WORLD_DATA = [
         'x           x      x',
         'xxxxxxxx  xxxxxxxxxx',
       ],
-      items: ['2,2', '5,5'] // Key and sword positions
+      items: ['2,2', '5,5'], // Key and sword positions
     },
     {
       layout: [
@@ -47,9 +47,16 @@ export const WORLD_DATA = [
         '      b             ',
         'x    bbb           x',
         'x                  x',
-        'x                  x',
+        'x           m      x',
         'x                  x',
         'xxxxxxxx  xxxxxxxxxx',
+      ],
+      enemies: [
+        {
+          type: 'slime',
+          x: 10,
+          y: 5
+        }
       ],
       items: []
     },
@@ -103,7 +110,7 @@ export const WORLD_DATA = [
         'x   w         w    x',
         'x   wwwww=wwwww    x',
         'x                  x',
-        'x        k         x',
+        'x  m     k         x',
         'xxxxxxxxxxxxxxxxxxxx',
       ],
       items: ['8,10'] // Key position

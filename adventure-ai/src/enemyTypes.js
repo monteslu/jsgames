@@ -5,7 +5,7 @@ import { BEHAVIORS } from './enemyBehaviors.js';
 export const ENEMY_TYPES = {
   slime: {
     health: 2,
-    speed: 0.05,
+    speed: 2,
     damage: 1,
     behavior: BEHAVIORS.CHASE,
     color: COLORS.green,

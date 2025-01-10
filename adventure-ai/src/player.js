@@ -1,6 +1,7 @@
 // player.js
 import { PLAYER_STATES, DIRECTIONS, PLAYER_SPEED, PLAYER_ATTACK_DURATION, 
-         PLAYER_HURT_DURATION, PLAYER_INVINCIBLE_DURATION, SPRITE_CONFIG, TILE_TYPES } from './constants.js';
+         PLAYER_HURT_DURATION, PLAYER_INVINCIBLE_DURATION, SPRITE_CONFIG } from './constants.js';
+import { playSound } from './utils.js';
 
 export class Player {
   constructor(x, y, resources, combatSystem, worldManager) {
@@ -54,8 +55,17 @@ export class Player {
     }
     
     if (this.knockback) {
-      this.x += this.knockback.x * deltaTime * 0.01;
-      this.y += this.knockback.y * deltaTime * 0.01;
+      const oldX = this.x;
+      const oldY = this.y;
+      
+      this.x += this.knockback.x;
+      this.y += this.knockback.y;
+      
+      if (!this.worldManager.isWalkable(this.x, this.y, this.hitboxSize)) {
+        this.x = oldX;
+        this.y = oldY;
+      }
+      
       this.knockback.duration -= deltaTime;
       
       if (this.knockback.duration <= 0) {
@@ -113,22 +123,18 @@ export class Player {
       this.direction = DIRECTIONS.DOWN;
     }
 
-    // Normalize diagonal movement
     if (dx !== 0 && dy !== 0) {
       const normalizer = Math.sqrt(0.5);
       dx *= normalizer;
       dy *= normalizer;
     }
 
-    // Calculate new position with delta time
     const newX = this.x + dx * PLAYER_SPEED * (deltaTime / 1000);
     const newY = this.y + dy * PLAYER_SPEED * (deltaTime / 1000);
 
-    // Store current position for restoration if needed
     const oldX = this.x;
     const oldY = this.y;
 
-    // Try horizontal movement
     if (dx !== 0) {
       this.x = newX;
       if (!this.isValidPosition()) {
@@ -136,7 +142,6 @@ export class Player {
       }
     }
 
-    // Try vertical movement
     if (dy !== 0) {
       this.y = newY;
       if (!this.isValidPosition()) {
@@ -144,11 +149,14 @@ export class Player {
       }
     }
 
-    // Update tile position and movement state
     this.tileX = Math.floor(this.x);
     this.tileY = Math.floor(this.y);
     this.moving = dx !== 0 || dy !== 0;
-    this.state = this.moving ? PLAYER_STATES.WALKING : PLAYER_STATES.IDLE;
+    
+    // Only change to walking state if not attacking
+    if (this.state !== PLAYER_STATES.ATTACKING) {
+      this.state = this.moving ? PLAYER_STATES.WALKING : PLAYER_STATES.IDLE;
+    }
   }
 
   isValidPosition() {
@@ -197,7 +205,7 @@ export class Player {
     this.attackCooldown = PLAYER_ATTACK_DURATION + 100;
     
     this.combatSystem.createAttack(this, 'sword');
-    this.resources.sounds.sword?.play();
+    playSound(this.resources.sounds.sword);
   }
 
   rangedAttack() {
@@ -210,7 +218,7 @@ export class Player {
     
     this.combatSystem.createAttack(this, 'bow');
     this.inventory.arrows--;
-    this.resources.sounds.bow?.play();
+    playSound(this.resources.sounds.bow);
   }
 
   hurt(damage) {
@@ -222,7 +230,7 @@ export class Player {
     this.isInvincible = true;
     this.invincibleTime = 0;
     
-    this.resources.sounds.hurt?.play();
+    playSound(this.resources.sounds.hurt);
     
     if (this.health <= 0) {
       this.die();
@@ -286,16 +294,6 @@ export class Player {
     const srcX = frame * frameConfig.frameWidth;
     const srcY = Object.values(DIRECTIONS).indexOf(this.direction) * frameConfig.frameHeight;
     
-    // Draw hitbox using the same calculation as collision detection
-    // const hitbox = this.getHitbox();
-    // ctx.strokeStyle = 'red';
-    // ctx.strokeRect(
-    //   hitbox.left * 32,
-    //   hitbox.top * 32,
-    //   hitbox.width * 32,
-    //   hitbox.height * 32
-    // );
-
     // Draw sprite centered on position
     ctx.drawImage(
       sprite,
@@ -308,5 +306,42 @@ export class Player {
       32,
       32
     );
+
+    // Draw sword swing effect when attacking
+    if (this.state === PLAYER_STATES.ATTACKING && this.inventory.sword) {
+      const swingProgress = this.stateTime / PLAYER_ATTACK_DURATION;
+      const swingAngle = Math.PI * swingProgress;
+      
+      ctx.save();
+      ctx.translate(
+        Math.floor(this.x * 32),
+        Math.floor(this.y * 32)
+      );
+      
+      // Rotate based on direction and swing progress
+      switch(this.direction) {
+        case DIRECTIONS.RIGHT:
+          ctx.rotate(swingAngle);
+          break;
+        case DIRECTIONS.LEFT:
+          ctx.rotate(Math.PI + swingAngle);
+          break;
+        case DIRECTIONS.DOWN:
+          ctx.rotate(Math.PI/2 + swingAngle);
+          break;
+        case DIRECTIONS.UP:
+          ctx.rotate(-Math.PI/2 + swingAngle);
+          break;
+      }
+      
+      // Draw swing arc
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(0, 0, 20, -Math.PI/4, Math.PI/4);
+      ctx.stroke();
+      
+      ctx.restore();
+    }
   }
 }

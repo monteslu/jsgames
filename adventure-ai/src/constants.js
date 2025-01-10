@@ -9,7 +9,9 @@ export const TILE_TYPES = {
   BRIDGE: '=',
   KEY: 'k',
   SWORD: 's',
-  HEART: 'h'
+  HEART: 'h',
+  BOW: 'w',
+  ARROW: 'a'
 };
 
 export const DIRECTIONS = {
@@ -23,13 +25,20 @@ export const COLORS = {
   black: '#000000',
   white: '#FFFFFF',
   gray: '#7C7C7C',
+  darkGray: '#404040',
   red: '#FF0000',
+  lightGreenGrass: '#90EE90',
   green: '#00FF00',
   blue: '#0000FF',
   yellow: '#FFFF00',
   cyan: '#00FFFF',
   magenta: '#FF00FF',
-  tan: '#FCD8A8'
+  tan: '#FCD8A8',  // Playable area background color
+  minimap: {
+    unexplored: '#404040',    // Dark gray for unexplored areas
+    explored: '#FCD8A8',      // Same as playable area
+    current: '#FFFFFF'        // White for current room
+  }
 };
 
 export const SPRITE_CONFIG = {
@@ -50,7 +59,9 @@ export const SPRITE_CONFIG = {
     mapping: {
       [TILE_TYPES.KEY]: 0,
       [TILE_TYPES.SWORD]: 1,
-      [TILE_TYPES.HEART]: 2
+      [TILE_TYPES.HEART]: 2,
+      [TILE_TYPES.BOW]: 3,
+      [TILE_TYPES.ARROW]: 4
     }
   },
   player: {
@@ -67,7 +78,7 @@ export const SPRITE_CONFIG = {
       },
       attacking: {
         frames: [2],
-        frameTime: 0
+        frameTime: 200
       },
       hurt: {
         frames: [3],
@@ -96,9 +107,10 @@ export const SPRITE_CONFIG = {
 };
 
 export const PLAYER_SPEED = 5.0;
-export const PLAYER_ATTACK_DURATION = 250;
+export const PLAYER_ATTACK_DURATION = 200;
 export const PLAYER_HURT_DURATION = 500;
 export const PLAYER_INVINCIBLE_DURATION = 1000;
+export const PLAYER_ATTACK_COOLDOWN = 300;
 
 export const PLAYER_STATES = {
   IDLE: 'idle',
@@ -122,14 +134,40 @@ export const STATUS_BAR = {
   heartHeight: 24,
   heartSpacing: 4,
   weaponSize: 48,
-  miniMapScale: 2,
-  padding: 8
+  weaponSpacing: 8,
+  miniMap: {
+    screenWidth: 10,    // 10 pixels wide per screen
+    screenHeight: 6,    // 6 pixels high per screen
+    padding: 8
+  },
+  padding: 8,
+  sections: {
+    health: {
+      x: 8,
+      y: 8,
+      width: 120,
+      height: 32
+    },
+    weapons: {
+      x: -56,  // Negative means from right edge
+      y: 8,
+      width: 48,
+      height: 48
+    },
+    minimap: {
+      x: 'center',  // Center horizontally
+      y: 8,
+      width: null,  // Will be calculated based on world size
+      height: null  // Will be calculated based on world size
+    }
+  }
 };
 
 export const GAME_STATES = {
   LOADING: 'loading',
   PLAYING: 'playing',
   PAUSED: 'paused',
+  TRANSITIONING: 'transitioning',
   GAME_OVER: 'game_over'
 };
 
@@ -139,6 +177,20 @@ export const TRANSITION_CONFIG = {
     NONE: 'none',
     FADE: 'fade',
     SLIDE: 'slide'
+  }
+};
+
+export const COMBAT_CONFIG = {
+  SWORD: {
+    damage: 1,
+    range: 1.2,
+    arc: Math.PI / 2,
+    knockback: 0.2
+  },
+  BOW: {
+    damage: 1,
+    speed: 0.01,
+    range: 8
   }
 };
 

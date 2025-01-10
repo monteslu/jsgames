@@ -17,6 +17,8 @@ export class Enemy {
     this.stateTime = 0;
     this.currentFrame = 0;
     this.frameTime = 0;
+    this.attackCooldown = 0;
+    this.attackCooldownDuration = 1000; // 1 second between attacks
     
     // Movement and targeting
     this.target = null;
@@ -181,44 +183,96 @@ export class Enemy {
     }
   }
 
-  draw(ctx) {
-    // Skip drawing when briefly invincible
-    if (this.invincibleTime > 0 && Math.floor(this.invincibleTime / 100) % 2 === 0) {
+// In enemy.js, replace the draw method with this enhanced version:
+draw(ctx) {
+  // Skip drawing when briefly invincible
+  if (this.invincibleTime > 0 && Math.floor(this.invincibleTime / 100) % 2 === 0) {
       return;
-    }
-    
-    // Draw enemy sprite
-    ctx.fillStyle = this.config.color;
-    ctx.fillRect(
-      Math.floor(this.x * 32),
-      Math.floor(this.y * 32),
-      32,
-      32
-    );
-    
-    // Draw simple frame indication
-    ctx.strokeStyle = 'black';
-    ctx.strokeRect(
-      Math.floor(this.x * 32),
-      Math.floor(this.y * 32),
-      32,
-      32
-    );
-    
-    // Draw projectiles if any
-    for (const projectile of this.projectiles) {
+  }
+  
+  // Calculate bounce effect based on time
+  const bounceHeight = Math.abs(Math.sin(this.behaviorTime * 0.005)) * 8;
+  
+  // Draw slime body
+  ctx.fillStyle = this.config.color;
+  ctx.beginPath();
+  ctx.ellipse(
+      Math.floor(this.x * 32 + 16),
+      Math.floor(this.y * 32 + 24 - bounceHeight),
+      16,  // radiusX
+      12 + bounceHeight * 0.5,  // radiusY (stretches with bounce)
+      0,  // rotation
+      0,
+      Math.PI * 2
+  );
+  ctx.fill();
+  
+  // Draw eyes
+  ctx.fillStyle = 'white';
+  ctx.beginPath();
+  ctx.arc(
+      Math.floor(this.x * 32 + 12),
+      Math.floor(this.y * 32 + 20 - bounceHeight),
+      3,
+      0,
+      Math.PI * 2
+  );
+  ctx.arc(
+      Math.floor(this.x * 32 + 20),
+      Math.floor(this.y * 32 + 20 - bounceHeight),
+      3,
+      0,
+      Math.PI * 2
+  );
+  ctx.fill();
+  
+  // Draw pupils (look at player if visible)
+  ctx.fillStyle = 'black';
+  ctx.beginPath();
+  ctx.arc(
+      Math.floor(this.x * 32 + 12 + (this.target ? Math.sign(this.target.x - this.x) * 1 : 0)),
+      Math.floor(this.y * 32 + 20 - bounceHeight + (this.target ? Math.sign(this.target.y - this.y) * 1 : 0)),
+      1.5,
+      0,
+      Math.PI * 2
+  );
+  ctx.arc(
+      Math.floor(this.x * 32 + 20 + (this.target ? Math.sign(this.target.x - this.x) * 1 : 0)),
+      Math.floor(this.y * 32 + 20 - bounceHeight + (this.target ? Math.sign(this.target.y - this.y) * 1 : 0)),
+      1.5,
+      0,
+      Math.PI * 2
+  );
+  ctx.fill();
+  
+  // Draw shine spots on the slime
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+  ctx.beginPath();
+  ctx.ellipse(
+      Math.floor(this.x * 32 + 10),
+      Math.floor(this.y * 32 + 16 - bounceHeight),
+      2,
+      1,
+      Math.PI * 0.25,
+      0,
+      Math.PI * 2
+  );
+  ctx.fill();
+  
+  // Draw projectiles if any
+  for (const projectile of this.projectiles) {
       ctx.fillStyle = this.config.color;
       ctx.beginPath();
       ctx.arc(
-        Math.floor(projectile.x * 32 + 16),
-        Math.floor(projectile.y * 32 + 16),
-        6,
-        0,
-        Math.PI * 2
+          Math.floor(projectile.x * 32 + 16),
+          Math.floor(projectile.y * 32 + 16),
+          6,
+          0,
+          Math.PI * 2
       );
       ctx.fill();
-    }
   }
+}
 
   isDead() {
     return this.health <= 0;
