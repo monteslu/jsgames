@@ -58,7 +58,7 @@ export const SPRITE_CONFIG = {
     frameHeight: 32,
     mapping: {
       [TILE_TYPES.KEY]: 0,
-      [TILE_TYPES.SWORD]: 1,
+      [TILE_TYPES.SWORD]: 1,   // Sword is the second sprite in the items sheet
       [TILE_TYPES.HEART]: 2,
       [TILE_TYPES.BOW]: 3,
       [TILE_TYPES.ARROW]: 4

@@ -34,16 +34,32 @@ export class WorldManager {
         worldData.forEach((row, y) => {
             row.forEach((screenData, x) => {
                 if (screenData) {
+                    const layout = this.parseScreenLayout(screenData.layout);
+                    const items = new Set();
+                    
+                    // Process layout to find items and add them to the items set
+                    layout.forEach((row, rowIndex) => {
+                        row.forEach((tile, colIndex) => {
+                            if (tile === TILE_TYPES.KEY || 
+                                tile === TILE_TYPES.SWORD || 
+                                tile === TILE_TYPES.HEART ||
+                                tile === TILE_TYPES.BOW ||
+                                tile === TILE_TYPES.ARROW) {
+                                items.add(`${colIndex},${rowIndex}`);
+                            }
+                        });
+                    });
+
                     const screen = {
-                        layout: this.parseScreenLayout(screenData.layout),
-                        items: new Set(screenData.items || []),
+                        layout: layout,
+                        items: items,
                         enemies: new Set(),
                         enemyData: screenData.enemies || [],
                         visited: false,
                         cleared: false,
                         x: x,
                         y: y,
-                        backgroundColor: screenData.backgroundColor // Add this line to copy backgroundColor
+                        backgroundColor: screenData.backgroundColor
                     };
                     
                     if (screenData.enemies) {
@@ -237,6 +253,7 @@ export class WorldManager {
         const screen = this.getCurrentScreen();
         const key = `${x},${y}`;
         if (screen.items.has(key)) {
+            const tile = screen.layout[y][x];
             screen.items.delete(key);
             screen.layout[y][x] = TILE_TYPES.EMPTY;
             return true;
@@ -284,19 +301,23 @@ export class WorldManager {
     drawScreen(ctx, resources) {
         const screen = this.getCurrentScreen();
         
+        // Draw layout (walls, doors, etc.)
         screen.layout.forEach((row, y) => {
             row.forEach((tile, x) => {
                 if (tile === TILE_TYPES.EMPTY) return;
                 
-                const tileIndex = SPRITE_CONFIG.tiles.mapping[tile] || 0;
-                const srcX = tileIndex * SPRITE_CONFIG.tiles.frameWidth;
+                // Check if this position has an item
+                const isItem = screen.items.has(`${x},${y}`);
+                const spriteSheet = isItem ? resources.images.items : resources.images.tiles;
+                const config = isItem ? SPRITE_CONFIG.items : SPRITE_CONFIG.tiles;
+                const mapping = isItem ? config.mapping[tile] : config.mapping[tile] || 0;
                 
                 ctx.drawImage(
-                    resources.images.tiles,
-                    srcX,
+                    spriteSheet,
+                    mapping * config.frameWidth,
                     0,
-                    SPRITE_CONFIG.tiles.frameWidth,
-                    SPRITE_CONFIG.tiles.frameHeight,
+                    config.frameWidth,
+                    config.frameHeight,
                     x * 32,
                     y * 32,
                     32,
@@ -305,25 +326,7 @@ export class WorldManager {
             });
         });
         
-        const itemSheet = resources.images.items;
-        screen.items.forEach(itemPos => {
-            const [x, y] = itemPos.split(',').map(Number);
-            const tile = screen.layout[y][x];
-            const itemIndex = SPRITE_CONFIG.items.mapping[tile] || 0;
-            
-            ctx.drawImage(
-                itemSheet,
-                itemIndex * SPRITE_CONFIG.items.frameWidth,
-                0,
-                SPRITE_CONFIG.items.frameWidth,
-                SPRITE_CONFIG.items.frameHeight,
-                x * 32,
-                y * 32,
-                32,
-                32
-            );
-        });
-        
+        // Draw enemies
         screen.enemies.forEach(enemy => {
             enemy.draw(ctx);
         });
@@ -335,5 +338,41 @@ export class WorldManager {
 
     isScreenCleared() {
         return this.getCurrentScreen().cleared;
+    }
+
+    unstuckEntity(x, y, hitboxSize = 0.5) {
+        // Get the center of the current screen
+        const centerX = this.screenWidth / 2;
+        const centerY = this.screenHeight / 2;
+    
+        // Calculate direction to center
+        const dx = centerX - x;
+        const dy = centerY - y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+    
+        if (distance === 0) return { x, y };
+    
+        // Normalize direction
+        const normalizedDx = dx / distance;
+        const normalizedDy = dy / distance;
+    
+        // Try different distances from current position towards center
+        for (let step = 0.1; step <= distance; step += 0.1) {
+            const testX = x + normalizedDx * step;
+            const testY = y + normalizedDy * step;
+    
+            // Check if this position is walkable
+            if (this.isWalkable(testX, testY, hitboxSize)) {
+                return { x: testX, y: testY };
+            }
+        }
+    
+        // If all else fails, try to place at center
+        if (this.isWalkable(centerX, centerY, hitboxSize)) {
+            return { x: centerX, y: centerY };
+        }
+    
+        // If even center is not walkable, return original position
+        return { x, y };
     }
 }

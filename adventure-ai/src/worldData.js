@@ -1,11 +1,10 @@
 // worldData.js
 import { COLORS } from './constants.js';
 
-
 // x = impassable wall
 // w = water
 // b = bush
-// s = stairs
+// s = sword
 // k = key
 // d = door
 // h = heart
@@ -24,10 +23,10 @@ export const WORLD_DATA = [
       layout: [
         'xxxxxxxxxxxxxxxxxxxx',
         'x                  x',
-        'x    k             x',
+        'x    k     s       x',
         'x   xxx            x',
         'x                  x',
-        'x         s         ',
+        'x                   ',
         'x                   ',
         'x                  x',
         'x          xxx     x',
@@ -35,7 +34,7 @@ export const WORLD_DATA = [
         'x           x      x',
         'xxxxxxxx  xxxxxxxxxx',
       ],
-      items: ['2,2', '5,5'], // Key and sword positions
+      items: ['4,2', '9,2'], // Key and sword positions
     },
     {
       layout: [
@@ -79,7 +78,6 @@ export const WORLD_DATA = [
       items: [],
       backgroundColor: COLORS.lightGreenGrass,
     },
-    // ... more screens for row 0
   ],
   // Row 1
   [
@@ -117,9 +115,7 @@ export const WORLD_DATA = [
       ],
       items: ['8,10'] // Key position
     },
-    // ... more screens for row 1
   ],
-  // ... more rows
 ];
 
 // Helper function to create an empty screen template

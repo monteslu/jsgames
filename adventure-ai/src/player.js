@@ -1,6 +1,6 @@
 // player.js
 import { PLAYER_STATES, DIRECTIONS, PLAYER_SPEED, PLAYER_ATTACK_DURATION, 
-         PLAYER_HURT_DURATION, PLAYER_INVINCIBLE_DURATION, SPRITE_CONFIG } from './constants.js';
+         PLAYER_HURT_DURATION, PLAYER_INVINCIBLE_DURATION, SPRITE_CONFIG, TILE_TYPES } from './constants.js';
 import { playSound } from './utils.js';
 
 export class Player {
@@ -37,10 +37,18 @@ export class Player {
     this.attackCooldown = 0;
     this.knockback = null;
     this.hitboxSize = 0.6;  // Collision hitbox size (in tiles)
+    this.currentWeapon = 'sword';  // Default weapon
   }
 
   update(deltaTime, input) {
     this.stateTime += deltaTime;
+
+    // check if stuck in a wall
+    if (!this.worldManager.isWalkable(this.x, this.y, this.hitboxSize)) {
+      const unstuckPosition = this.worldManager.unstuckEntity(this.x, this.y, this.hitboxSize);
+      this.x = unstuckPosition.x;
+      this.y = unstuckPosition.y;
+    }
     
     if (this.isInvincible) {
       this.invincibleTime += deltaTime;
@@ -259,24 +267,25 @@ export class Player {
 
   addItem(item) {
     switch (item) {
-      case 'key':
+      case TILE_TYPES.KEY:
         this.inventory.keys++;
+        playSound(this.resources.sounds.item);
         break;
-      case 'sword':
+      case TILE_TYPES.SWORD:
         this.inventory.sword = true;
+        playSound(this.resources.sounds.item);
         break;
-      case 'bow':
+      case TILE_TYPES.BOW:
         this.inventory.bow = true;
+        playSound(this.resources.sounds.item);
         break;
-      case 'arrow':
+      case TILE_TYPES.ARROW:
         this.inventory.arrows += 5;
+        playSound(this.resources.sounds.item);
         break;
-      case 'heart':
+      case TILE_TYPES.HEART:
         this.heal(1);
-        break;
-      case 'heartContainer':
-        this.maxHealth++;
-        this.heal(1);
+        playSound(this.resources.sounds.item);
         break;
     }
   }
