@@ -9,6 +9,7 @@ export const ENEMY_TYPES = {
     damage: 1,
     behavior: BEHAVIORS.CHASE,
     color: COLORS.green,
+    colorHurt: COLORS.red,
     detectionRange: 5,
     animations: {
       idle: { frames: [0, 1], frameTime: 500 },

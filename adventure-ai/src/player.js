@@ -273,7 +273,7 @@ export class Player {
         break;
       case TILE_TYPES.SWORD:
         this.inventory.sword = true;
-        playSound(this.resources.sounds.item);
+        playSound(this.resources.sounds.tada);
         break;
       case TILE_TYPES.BOW:
         this.inventory.bow = true;

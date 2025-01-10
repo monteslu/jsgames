@@ -195,6 +195,9 @@ draw(ctx) {
   
   // Draw slime body
   ctx.fillStyle = this.config.color;
+  if (this.health < 2) {
+    ctx.fillStyle = this.config.colorHurt || this.config.color;
+  }
   ctx.beginPath();
   ctx.ellipse(
       Math.floor(this.x * 32 + 16),

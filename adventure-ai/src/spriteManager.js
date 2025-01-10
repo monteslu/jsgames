@@ -75,7 +75,7 @@ export class SpriteManager {
   }
 
   generateItemSheet() {
-    const numItems = 5; // key, sword, heart, empty heart, bow
+    const numItems = 5; // key, sword, heart, bow, arrow
     const canvas = this.createCanvas(this.tileSize * numItems, this.tileSize);
     const ctx = canvas.getContext('2d');
 
@@ -83,8 +83,8 @@ export class SpriteManager {
     this.drawKeySprite(ctx, 0);
     this.drawSwordSprite(ctx, 1);
     this.drawHeartSprite(ctx, 2, true);
-    this.drawHeartSprite(ctx, 3, false);
-    this.drawBowSprite(ctx, 4);
+    this.drawBowSprite(ctx, 3);
+    this.drawArrowSprite(ctx, 4);
 
     this.itemSheet = canvas;
     return Promise.resolve();
@@ -137,10 +137,6 @@ export class SpriteManager {
       // Standing pose
       ctx.fillRect(x + 11, y + 24, 10, 6); // Legs together
     }
-
-    // Draw outline
-    ctx.strokeStyle = this.characterColors.outline;
-    ctx.strokeRect(x + 8, y + 8, 16, 16);
   }
 
   drawWallTile(ctx, index) {
@@ -228,74 +224,108 @@ export class SpriteManager {
 
   drawKeySprite(ctx, index) {
     const x = index * this.tileSize;
-    const y = 0;  // All sprites are in first row
     
     // Key body
     ctx.fillStyle = COLORS.yellow;
-    ctx.fillRect(x + 16, y + 8, 12, 4);
+    ctx.fillRect(x + 16, 8, 12, 4);
     
     // Key head
     ctx.beginPath();
-    ctx.arc(x + 10, y + 10, 6, 0, Math.PI * 2);
+    ctx.arc(x + 10, 10, 6, 0, Math.PI * 2);
     ctx.fill();
     
     // Key teeth
-    ctx.fillRect(x + 20, y + 8, 2, 6);
-    ctx.fillRect(x + 24, y + 8, 2, 8);
+    ctx.fillRect(x + 20, 8, 2, 6);
+    ctx.fillRect(x + 24, 8, 2, 8);
   }
 
   drawSwordSprite(ctx, index) {
     const x = index * this.tileSize;
-    const y = 0;  // All sprites are in first row
     
     // Blade
     ctx.fillStyle = COLORS.white;
-    ctx.fillRect(x + 14, y + 4, 4, 20);
+    ctx.fillRect(x + 14, 4, 4, 20);
+    
+    // Blade shine
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+    ctx.fillRect(x + 15, 4, 2, 20);
     
     // Handle
     ctx.fillStyle = COLORS.yellow;
-    ctx.fillRect(x + 12, y + 24, 8, 4);
+    ctx.fillRect(x + 12, 24, 8, 4);
     
     // Guard
-    ctx.fillRect(x + 10, y + 20, 12, 4);
+    ctx.fillStyle = COLORS.yellow;
+    ctx.fillRect(x + 10, 20, 12, 4);
+    
+    // Pommel
+    ctx.fillStyle = COLORS.yellow;
+    ctx.beginPath();
+    ctx.arc(x + 16, 27, 2, 0, Math.PI * 2);
+    ctx.fill();
   }
 
   drawHeartSprite(ctx, index, filled) {
     const x = index * this.tileSize;
-    const y = 0;
     
     // Heart shape using rectangles for retro feel
     ctx.fillStyle = filled ? COLORS.red : COLORS.gray;
     
     // Top rectangles for the curves
-    ctx.fillRect(x + 8, y + 8, 6, 6);
-    ctx.fillRect(x + 18, y + 8, 6, 6);
+    ctx.fillRect(x + 8, 8, 6, 6);
+    ctx.fillRect(x + 18, 8, 6, 6);
     
     // Bottom triangle approximation with rectangles
-    ctx.fillRect(x + 6, y + 14, 20, 4);
-    ctx.fillRect(x + 8, y + 18, 16, 4);
-    ctx.fillRect(x + 10, y + 22, 12, 4);
-    ctx.fillRect(x + 14, y + 26, 4, 4);
+    ctx.fillRect(x + 6, 14, 20, 4);
+    ctx.fillRect(x + 8, 18, 16, 4);
+    ctx.fillRect(x + 10, 22, 12, 4);
+    ctx.fillRect(x + 14, 26, 4, 4);
   }
 
   drawBowSprite(ctx, index) {
     const x = index * this.tileSize;
-    const y = 0;
     
     // Bow curve
     ctx.strokeStyle = COLORS.yellow;
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.arc(x + 16, y + 16, 12, Math.PI * 0.25, Math.PI * 1.75);
+    ctx.arc(x + 16, 16, 12, Math.PI * 0.25, Math.PI * 1.75);
     ctx.stroke();
     
     // Bowstring
     ctx.strokeStyle = COLORS.white;
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(x + 16, y + 4);
-    ctx.lineTo(x + 16, y + 28);
+    ctx.moveTo(x + 16, 4);
+    ctx.lineTo(x + 16, 28);
     ctx.stroke();
+  }
+
+  drawArrowSprite(ctx, index) {
+    const x = index * this.tileSize;
+    
+    // Arrow shaft
+    ctx.fillStyle = COLORS.yellow;
+    ctx.fillRect(x + 8, 15, 16, 2);
+    
+    // Arrow head
+    ctx.beginPath();
+    ctx.moveTo(x + 24, 16);
+    ctx.lineTo(x + 28, 12);
+    ctx.lineTo(x + 28, 20);
+    ctx.closePath();
+    ctx.fill();
+    
+    // Arrow fletching
+    ctx.fillStyle = COLORS.red;
+    ctx.beginPath();
+    ctx.moveTo(x + 8, 16);
+    ctx.lineTo(x + 4, 12);
+    ctx.lineTo(x + 8, 14);
+    ctx.moveTo(x + 8, 16);
+    ctx.lineTo(x + 4, 20);
+    ctx.lineTo(x + 8, 18);
+    ctx.fill();
   }
 
   getTileSheet() {

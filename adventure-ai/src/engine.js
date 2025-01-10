@@ -41,6 +41,7 @@ export class GameEngine {
     this.resources.addSound('sword', 'sounds/sword.mp3');
     this.resources.addSound('item', 'sounds/item.mp3');
     this.resources.addSound('hurt', 'sounds/hurt.mp3');
+    this.resources.addSound('tada', 'sounds/tada.mp3');
     
     return this.resources.load().then(() => {
       this.currentState = this.GAME_STATES.PLAYING;
