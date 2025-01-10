@@ -1,4 +1,5 @@
 // worldData.js
+import { COLORS } from './constants.js';
 
 
 // x = impassable wall
@@ -75,7 +76,8 @@ export const WORLD_DATA = [
         'x                  x',
         'xxxxxxxx  xxxxxxxxxx',
       ],
-      items: []
+      items: [],
+      backgroundColor: COLORS.lightGreenGrass,
     },
     // ... more screens for row 0
   ],
@@ -177,7 +179,7 @@ export function createDungeonRoom() {
 export function addItemsToScreen(screen, items) {
   const newScreen = {
     ...screen,
-    items: [...screen.items]
+    items: [...screen.items],
   };
   
   items.forEach(({type, x, y}) => {

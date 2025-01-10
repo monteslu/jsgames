@@ -25,8 +25,13 @@ export class GameRenderer {
   }
 
   draw({ gameState, player, worldManager, combatSystem, transitionManager }) {
-    // Draw background
-    this.ctx.fillStyle = COLORS.tan;
+    // Get current screen and its background color
+    const currentScreen = worldManager.getCurrentScreen();
+    console.log('currentScreen', currentScreen);
+    const backgroundColor = currentScreen?.backgroundColor || COLORS.tan;
+    
+    // Draw background with either custom color or default tan
+    this.ctx.fillStyle = backgroundColor;
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     
     // Draw status bar (always on top)

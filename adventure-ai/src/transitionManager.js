@@ -1,5 +1,5 @@
 // transitionManager.js
-import { STATUS_BAR } from './constants.js';
+import { STATUS_BAR, COLORS } from './constants.js';
 
 export class TransitionManager {
   constructor() {
@@ -117,14 +117,20 @@ export class TransitionManager {
 
   drawHorizontalTransition(ctx, canvas, worldManager, resources, progress, direction) {
     const nextScreen = worldManager.getNextScreen(direction > 0 ? 'right' : 'left');
-    
-    // Current screen
+    const playAreaHeight = canvas.height - STATUS_BAR.height;
+
+    // Draw current screen and its background
+    const currentScreen = worldManager.getCurrentScreen();
     ctx.save();
     ctx.translate(-canvas.width * progress * direction, STATUS_BAR.height);
+    
+    // Draw background for current screen
+    ctx.fillStyle = currentScreen.backgroundColor || COLORS.tan;
+    ctx.fillRect(0, 0, canvas.width, playAreaHeight);
     worldManager.drawScreen(ctx, resources);
     ctx.restore();
     
-    // Next screen
+    // Draw next screen and its background if it exists
     if (nextScreen) {
       ctx.save();
       ctx.translate(canvas.width * (1 - progress) * direction, STATUS_BAR.height);
@@ -134,7 +140,11 @@ export class TransitionManager {
       } else {
         worldManager.currentScreenX--;
       }
-      
+
+      // Draw background for next screen
+      const nextScreenObj = worldManager.getCurrentScreen();
+      ctx.fillStyle = nextScreenObj.backgroundColor || COLORS.tan;
+      ctx.fillRect(0, 0, canvas.width, playAreaHeight);
       worldManager.drawScreen(ctx, resources);
       ctx.restore();
     }
@@ -144,13 +154,18 @@ export class TransitionManager {
     const nextScreen = worldManager.getNextScreen(direction > 0 ? 'down' : 'up');
     const playAreaHeight = canvas.height - STATUS_BAR.height;
     
-    // Current screen
+    // Draw current screen and its background
+    const currentScreen = worldManager.getCurrentScreen();
     ctx.save();
     ctx.translate(0, -playAreaHeight * progress * direction + STATUS_BAR.height);
+    
+    // Draw background for current screen
+    ctx.fillStyle = currentScreen.backgroundColor || COLORS.tan;
+    ctx.fillRect(0, 0, canvas.width, playAreaHeight);
     worldManager.drawScreen(ctx, resources);
     ctx.restore();
     
-    // Next screen
+    // Draw next screen and its background if it exists
     if (nextScreen) {
       ctx.save();
       ctx.translate(0, playAreaHeight * (1 - progress) * direction + STATUS_BAR.height);
@@ -160,7 +175,11 @@ export class TransitionManager {
       } else {
         worldManager.currentScreenY--;
       }
-      
+
+      // Draw background for next screen
+      const nextScreenObj = worldManager.getCurrentScreen();
+      ctx.fillStyle = nextScreenObj.backgroundColor || COLORS.tan;
+      ctx.fillRect(0, 0, canvas.width, playAreaHeight);
       worldManager.drawScreen(ctx, resources);
       ctx.restore();
     }

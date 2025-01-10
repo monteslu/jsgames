@@ -42,7 +42,8 @@ export class WorldManager {
                         visited: false,
                         cleared: false,
                         x: x,
-                        y: y
+                        y: y,
+                        backgroundColor: screenData.backgroundColor // Add this line to copy backgroundColor
                     };
                     
                     if (screenData.enemies) {
@@ -258,8 +259,8 @@ export class WorldManager {
         this.worldGrid.forEach((row, screenY) => {
             row.forEach((screen, screenX) => {
                 if (screen.visited) {
-                    // Draw explored rooms in playable area color
-                    ctx.fillStyle = COLORS.minimap.explored;
+                    // Use screen's custom background color or default explored color
+                    ctx.fillStyle = screen.backgroundColor || COLORS.minimap.explored;
                     ctx.fillRect(
                         x + screenX * screenWidth,
                         y + screenY * screenHeight,
