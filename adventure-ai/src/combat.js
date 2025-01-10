@@ -1,5 +1,5 @@
 // combat.js
-import { DIRECTIONS, PLAYER_STATES } from './constants.js';
+import { DIRECTIONS, PLAYER_STATES, COMBAT_CONFIG } from './constants.js';
 import { playSound } from './utils.js';
 
 export class CombatSystem {
@@ -111,12 +111,15 @@ export class CombatSystem {
       case 'bow':
         attack = this.createArrowAttack(attacker);
         break;
+      case 'dagger':
+        attack = this.createDaggerAttack(attacker);
+        break;
     }
     
     if (attack) {
       this.attacks.add(attack);
       // Play attack sound
-      playSound(this.resources.sounds[type]);
+      playSound(this.resources.sounds[type === 'dagger' ? 'sword' : type]);
     }
   }
 
@@ -162,9 +165,34 @@ export class CombatSystem {
       dy: vector.dy,
       width: 0.5,
       height: 0.5,
-      damage: 1,
+      damage: COMBAT_CONFIG.BOW.damage,
       lifetime: 1000,
-      speed: 0.01
+      speed: COMBAT_CONFIG.BOW.speed
+    };
+  }
+
+  createDaggerAttack(player) {
+    const directionVectors = {
+      [DIRECTIONS.UP]: { dx: 0, dy: -1 },
+      [DIRECTIONS.DOWN]: { dx: 0, dy: 1 },
+      [DIRECTIONS.LEFT]: { dx: -1, dy: 0 },
+      [DIRECTIONS.RIGHT]: { dx: 1, dy: 0 }
+    };
+    
+    const vector = directionVectors[player.direction];
+    
+    return {
+      type: 'projectile',
+      x: player.x + vector.dx,
+      y: player.y + vector.dy,
+      dx: vector.dx,
+      dy: vector.dy,
+      width: COMBAT_CONFIG.DAGGER.size,
+      height: COMBAT_CONFIG.DAGGER.size,
+      damage: COMBAT_CONFIG.DAGGER.damage,
+      lifetime: 800,  // Shorter lifetime than arrows
+      speed: COMBAT_CONFIG.DAGGER.speed,
+      isDagger: true  // Flag to identify as dagger for rendering
     };
   }
 
@@ -208,15 +236,35 @@ export class CombatSystem {
   draw(ctx) {
     // Draw attacks
     for (const attack of this.attacks) {
-      // Only draw projectile attacks - melee attacks are shown by player animation
       if (attack.type === 'projectile') {
-        ctx.fillStyle = '#ff0';
-        ctx.fillRect(
-          Math.floor((attack.x - attack.width/2) * 32),
-          Math.floor((attack.y - attack.height/2) * 32),
-          Math.floor(attack.width * 32),
-          Math.floor(attack.height * 32)
+        ctx.fillStyle = attack.isDagger ? '#silver' : '#ff0';
+        const size = attack.isDagger ? 16 : 24;
+        
+        ctx.save();
+        ctx.translate(
+          Math.floor(attack.x * 32),
+          Math.floor(attack.y * 32)
         );
+        
+        // Rotate based on direction
+        const angle = Math.atan2(attack.dy, attack.dx);
+        ctx.rotate(angle);
+        
+        if (attack.isDagger) {
+          // Draw dagger shape
+          ctx.beginPath();
+          ctx.moveTo(-size/2, 0);
+          ctx.lineTo(size/2, 0);
+          ctx.lineTo(size/4, size/4);
+          ctx.lineTo(-size/4, size/4);
+          ctx.closePath();
+          ctx.fill();
+        } else {
+          // Draw arrow
+          ctx.fillRect(-size/2, -2, size, 4);
+        }
+        
+        ctx.restore();
       }
     }
     

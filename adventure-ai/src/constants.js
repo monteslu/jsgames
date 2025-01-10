@@ -5,12 +5,12 @@ export const TILE_TYPES = {
   WALL: 'x',
   DOOR: 'd',
   BUSH: 'b',
-  WATER: 'w',  // This stays as 'w'
+  WATER: 'w',  
   BRIDGE: '=',
   KEY: 'k',
   SWORD: 's',
   HEART: 'h',
-  BOW: 'B',    // Changed from 'w' to 'B' to avoid conflict with WATER
+  BOW: 'B',    
   ARROW: 'a'
 };
 
@@ -33,11 +33,11 @@ export const COLORS = {
   yellow: '#FFFF00',
   cyan: '#00FFFF',
   magenta: '#FF00FF',
-  tan: '#FCD8A8',  // Playable area background color
+  tan: '#FCD8A8',  
   minimap: {
-    unexplored: '#404040',    // Dark gray for unexplored areas
-    explored: '#FCD8A8',      // Same as playable area
-    current: '#FFFFFF'        // White for current room
+    unexplored: '#404040',    
+    explored: '#FCD8A8',      
+    current: '#FFFFFF'        
   }
 };
 
@@ -49,7 +49,7 @@ export const SPRITE_CONFIG = {
       [TILE_TYPES.WALL]: 0,
       [TILE_TYPES.DOOR]: 1,
       [TILE_TYPES.BUSH]: 2,
-      [TILE_TYPES.WATER]: 3,    // Water is the fourth image (index 3)
+      [TILE_TYPES.WATER]: 3,    
       [TILE_TYPES.BRIDGE]: 4
     }
   },
@@ -136,8 +136,8 @@ export const STATUS_BAR = {
   weaponSize: 48,
   weaponSpacing: 8,
   miniMap: {
-    screenWidth: 10,    // 10 pixels wide per screen
-    screenHeight: 6,    // 6 pixels high per screen
+    screenWidth: 10,    
+    screenHeight: 6,    
     padding: 8
   },
   padding: 8,
@@ -149,16 +149,16 @@ export const STATUS_BAR = {
       height: 32
     },
     weapons: {
-      x: -56,  // Negative means from right edge
+      x: -56,  
       y: 8,
       width: 48,
       height: 48
     },
     minimap: {
-      x: 'center',  // Center horizontally
+      x: 'center',  
       y: 8,
-      width: null,  // Will be calculated based on world size
-      height: null  // Will be calculated based on world size
+      width: null,  
+      height: null  
     }
   }
 };
@@ -191,6 +191,12 @@ export const COMBAT_CONFIG = {
     damage: 1,
     speed: 0.01,
     range: 8
+  },
+  DAGGER: {
+    damage: 1,
+    speed: 0.015,  // Faster than arrows
+    range: 6,
+    size: 0.3      // Smaller hitbox than arrows
   }
 };
 

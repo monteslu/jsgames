@@ -7,9 +7,9 @@ export class Player {
   constructor(x, y, resources, combatSystem, worldManager) {
     this.x = x;
     this.y = y;
-    this.initialX = x;  // Store initial position for respawn
+    this.initialX = x;
     this.initialY = y;
-    this.initialScreenX = worldManager.currentScreenX;  // Store initial screen for respawn
+    this.initialScreenX = worldManager.currentScreenX;
     this.initialScreenY = worldManager.currentScreenY;
     this.tileX = Math.floor(x);
     this.tileY = Math.floor(y);
@@ -39,15 +39,15 @@ export class Player {
     this.moving = false;
     
     this.attackCooldown = 0;
+    this.daggerCooldown = 0;  // Separate cooldown for dagger attacks
     this.knockback = null;
-    this.hitboxSize = 0.6;  // Collision hitbox size (in tiles)
-    this.currentWeapon = 'sword';  // Default weapon
+    this.hitboxSize = 0.6;
+    this.currentWeapon = 'sword';
   }
 
   update(deltaTime, input) {
     this.stateTime += deltaTime;
 
-    // check if stuck in a wall
     if (!this.worldManager.isWalkable(this.x, this.y, this.hitboxSize)) {
       const unstuckPosition = this.worldManager.unstuckEntity(this.x, this.y, this.hitboxSize);
       this.x = unstuckPosition.x;
@@ -62,8 +62,12 @@ export class Player {
       }
     }
     
+    // Update cooldowns
     if (this.attackCooldown > 0) {
       this.attackCooldown = Math.max(0, this.attackCooldown - deltaTime);
+    }
+    if (this.daggerCooldown > 0) {
+      this.daggerCooldown = Math.max(0, this.daggerCooldown - deltaTime);
     }
     
     if (this.knockback) {
@@ -165,7 +169,6 @@ export class Player {
     this.tileY = Math.floor(this.y);
     this.moving = dx !== 0 || dy !== 0;
     
-    // Only change to walking state if not attacking
     if (this.state !== PLAYER_STATES.ATTACKING) {
       this.state = this.moving ? PLAYER_STATES.WALKING : PLAYER_STATES.IDLE;
     }
@@ -187,17 +190,36 @@ export class Player {
   }
 
   handleAttack(input) {
-    if (this.attackCooldown > 0) return;
-    
-    if (input.BUTTON_SOUTH.pressed) {
-      if (this.inventory.sword) {
-        this.meleeAttack();
-      }
-    } else if (input.BUTTON_EAST.pressed) {
-      if (this.inventory.bow && this.inventory.arrows > 0) {
-        this.rangedAttack();
+    // Regular weapon attacks
+    if (this.attackCooldown <= 0) {
+      if (input.BUTTON_SOUTH.pressed) {
+        if (this.inventory.sword) {
+          this.meleeAttack();
+        }
+      } else if (input.BUTTON_EAST.pressed) {
+        if (this.inventory.bow && this.inventory.arrows > 0) {
+          this.rangedAttack();
+        }
       }
     }
+
+    // Dagger attack - only when at full health, has sword, and not on cooldown
+    if (this.health === this.maxHealth && 
+        this.inventory.sword &&
+        this.daggerCooldown <= 0 && 
+        input.BUTTON_WEST?.pressed) {
+      this.throwDagger();
+    }
+  }
+
+  throwDagger() {
+    this.state = PLAYER_STATES.ATTACKING;
+    this.stateTime = 0;
+    this.currentFrame = 0;
+    this.daggerCooldown = 400;  // Longer cooldown than regular attacks
+    
+    this.combatSystem.createAttack(this, 'dagger');
+    playSound(this.resources.sounds.sword);  // Reuse sword sound for now
   }
 
   handleWeaponSwitch(input) {
@@ -250,10 +272,8 @@ export class Player {
   }
 
   die() {
-    // Play death sound
     playSound(this.resources.sounds.death);
     
-    // Reset player position to starting point and screen
     this.worldManager.currentScreenX = this.initialScreenX;
     this.worldManager.currentScreenY = this.initialScreenY;
     this.x = this.initialX;
@@ -261,13 +281,11 @@ export class Player {
     this.tileX = Math.floor(this.x);
     this.tileY = Math.floor(this.y);
     
-    // Restore full health
     this.health = this.maxHealth;
     
-    // Reset state
     this.state = PLAYER_STATES.IDLE;
     this.stateTime = 0;
-    this.isInvincible = true;  // Brief invincibility after respawn
+    this.isInvincible = true;
     this.invincibleTime = 0;
     this.knockback = null;
   }
