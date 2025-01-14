@@ -27,7 +27,7 @@ export class GameRenderer {
   draw({ gameState, player, worldManager, combatSystem, transitionManager }) {
     // Get current screen and its background color
     const currentScreen = worldManager.getCurrentScreen();
-    console.log('currentScreen', currentScreen);
+    // console.log('currentScreen', currentScreen);
     const backgroundColor = currentScreen?.backgroundColor || COLORS.tan;
     
     // Draw background with either custom color or default tan

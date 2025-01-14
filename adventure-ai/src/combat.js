@@ -1,5 +1,5 @@
 // combat.js
-import { DIRECTIONS, PLAYER_STATES, COMBAT_CONFIG } from './constants.js';
+import { DIRECTIONS, PLAYER_STATES, COMBAT_CONFIG, TILE_TYPES } from './constants.js';
 import { playSound } from './utils.js';
 
 export class CombatSystem {
@@ -50,9 +50,23 @@ export class CombatSystem {
       }
       
       // Check collision with walls for projectiles
-      if (attack.type === 'projectile' && !worldManager.isWalkable(attack.x, attack.y)) {
-        this.attacks.delete(attack);
-        this.createHitParticles(attack.x, attack.y);
+      if (attack.type === 'projectile') {
+        const tileX = Math.floor(attack.x);
+        const tileY = Math.floor(attack.y);
+        const tile = worldManager.getTile(tileX, tileY);
+
+        // For daggers, only stop on solid walls, not water
+        if (attack.isDagger) {
+          if (tile === TILE_TYPES.WALL || tile === TILE_TYPES.DOOR) {
+            this.attacks.delete(attack);
+            this.createHitParticles(attack.x, attack.y);
+          }
+        } 
+        // For other projectiles (arrows), stop on any non-walkable tile
+        else if (!worldManager.isWalkable(attack.x, attack.y)) {
+          this.attacks.delete(attack);
+          this.createHitParticles(attack.x, attack.y);
+        }
       }
     }
     

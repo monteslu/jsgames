@@ -1,20 +1,13 @@
-import getInput from './input.js';
-const { requestAnimationFrame } = globalThis;
+import { getInput } from './utils.js';
 
-const TILE_SIZE = 256; // Size of each tile in pixels
-const player = { x: 2.5 * TILE_SIZE, y: 11.5 * TILE_SIZE, angle: 0 }; // Player position and angle
 
 let canvas = document.getElementById('game-canvas');
-canvas.width = 320;
-canvas.height = 240;
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 const ctx = canvas.getContext('2d');
 
-const game = {
-  initialize: async (c) => {
-    canvas = c;
-    return canvas;
-  },
-};
+const TILE_SIZE = canvas.width / 4; // Size of each tile in pixels
+const player = { x: 2.5 * TILE_SIZE, y: 11.5 * TILE_SIZE, angle: 0 }; // Player position and angle
 
 // Define the map
 const floor1 = [
@@ -133,4 +126,3 @@ function gameLoop() {
 
 gameLoop();
 
-export default game;

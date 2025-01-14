@@ -81,7 +81,14 @@ export const WORLD_DATA = [
         'x                  x',
         'xxxxxxxxxxxxxxxxxxxx',
       ],
-      items: ['9,9'] // Heart position
+      items: ['9,11'], // Heart position
+      enemies: [
+        {
+          type: 'bat',
+          x: 13,
+          y: 10
+        }
+      ],
     },
     {
       layout: [
