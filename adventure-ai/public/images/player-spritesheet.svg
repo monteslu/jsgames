@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 288 128">
+  <!-- Background -->
+  <rect width="288" height="128" fill="#000"/>
+  
+  <!-- Down-facing animations (row 0) -->
+  <g transform="translate(0,0)">
+    <!-- Idle frame -->
+    <g transform="translate(0,0)">
+      <rect x="8" y="8" width="16" height="16" fill="#00FF00"/>
+      <rect x="10" y="4" width="12" height="12" fill="#FFFF00"/>
+      <circle cx="14" cy="8" r="1" fill="#000"/>
+      <circle cx="18" cy="8" r="1" fill="#000"/>
+    </g>
+    
+    <!-- Walking frames -->
+    <g transform="translate(32,0)">
+      <use href="#frame1" transform="translate(0,0)"/>
+    </g>
+    <g transform="translate(64,0)">
+      <use href="#frame2" transform="translate(0,0)"/>
+    </g>
+    <g transform="translate(96,0)">
+      <use href="#frame3" transform="translate(0,0)"/>
+    </g>
+    
+    <!-- Attack frames -->
+    <g transform="translate(128,0)">
+      <use href="#attack1" transform="translate(0,0)"/>
+    </g>
+    <g transform="translate(160,0)">
+      <use href="#attack2" transform="translate(0,0)"/>
+    </g>
+    <g transform="translate(192,0)">
+      <use href="#attack3" transform="translate(0,0)"/>
+    </g>
+    
+    <!-- Hurt frame -->
+    <g transform="translate(224,0)">
+      <use href="#hurt" transform="translate(0,0)"/>
+    </g>
+  </g>
+  
+  <!-- Define reusable elements -->
+  <defs>
+    <!-- Basic walking frame -->
+    <g id="frame1">
+      <rect x="8" y="8" width="16" height="16" fill="#00FF00"/>
+      <rect x="10" y="4" width="12" height="12" fill="#FFFF00"/>
+    </g>
+    
+    <!-- Walking frame 2 -->
+    <g id="frame2">
+      <rect x="8" y="6" width="16" height="16" fill="#00FF00"/>
+      <rect x="10" y="2" width="12" height="12" fill="#FFFF00"/>
+    </g>
+    
+    <!-- Walking frame 3 -->
+    <g id="frame3">
+      <rect x="8" y="8" width="16" height="16" fill="#00FF00"/>
+      <rect x="10" y="4" width="12" height="12" fill="#FFFF00"/>
+    </g>
+    
+    <!-- Attack frame 1 -->
+    <g id="attack1">
+      <rect x="8" y="8" width="16" height="16" fill="#00FF00"/>
+      <rect x="10" y="4" width="12" height="12" fill="#FFFF00"/>
+      <rect x="24" y="12" width="8" height="2" fill="#FFFFFF"/>
+    </g>
+    
+    <!-- Attack frame 2 -->
+    <g id="attack2">
+      <rect x="8" y="8" width="16" height="16" fill="#00FF00"/>
+      <rect x="10" y="4" width="12" height="12" fill="#FFFF00"/>
+      <rect x="24" y="12" width="12" height="2" fill="#FFFFFF"/>
+    </g>
+    
+    <!-- Attack frame 3 -->
+    <g id="attack3">
+      <rect x="8" y="8" width="16" height="16" fill="#00FF00"/>
+      <rect x="10" y="4" width="12" height="12" fill="#FFFF00"/>
+      <rect x="24" y="12" width="6" height="2" fill="#FFFFFF"/>
+    </g>
+    
+    <!-- Hurt frame -->
+    <g id="hurt">
+      <rect x="8" y="8" width="16" height="16" fill="#FF0000"/>
+      <rect x="10" y="4" width="12" height="12" fill="#FFFF00"/>
+    </g>
+  </defs>
+  
+  <!-- Up-facing animations (row 1) -->
+  <g transform="translate(0,32)">
+    <use href="#frame1"/>
+    <use href="#frame2" transform="translate(32,0)"/>
+    <use href="#frame3" transform="translate(64,0)"/>
+    <use href="#attack1" transform="translate(96,0)"/>
+  </g>
+  
+  <!-- Left-facing animations (row 2) -->
+  <g transform="translate(0,64)">
+    <use href="#frame1"/>
+    <use href="#frame2" transform="translate(32,0)"/>
+    <use href="#frame3" transform="translate(64,0)"/>
+    <use href="#attack1" transform="translate(96,0)"/>
+  </g>
+  
+  <!-- Right-facing animations (row 3) -->
+  <g transform="translate(0,96)">
+    <use href="#frame1"/>
+    <use href="#frame2" transform="translate(32,0)"/>
+    <use href="#frame3" transform="translate(64,0)"/>
+    <use href="#attack1" transform="translate(96,0)"/>
+  </g>
+</svg>

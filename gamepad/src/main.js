@@ -1,6 +1,10 @@
 import { loadImage, getInput } from './utils.js';
 
 const canvas = document.getElementById('gameCanvas');
+canvas.height = window.innerHeight;
+canvas.width = window.innerWidth;
+
+
 const ctx = canvas.getContext('2d');
 
 const _jsg = globalThis._jsg;
@@ -241,12 +245,12 @@ function draw() {
     }
     if (_jsg) {
       ctx.fillStyle = 'white';
-      ctx.font = `${buttonSize}px Arial`;
+      ctx.font = `${buttonSize * 0.7}px Arial`;
       ctx.textAlign = 'left';
       const hasController = _jsg.controllers.length > 0;
       const hasJoystick = _jsg.joysticks.length > 0;
-      ctx.fillText('SDL ' + `${hasController ? 'Controller' : ''} ${hasJoystick ? 'Joystick' : ''}`
-        , (gps * 20), gamepadHeight + (buttonSize * 3));
+      ctx.fillText('SDL ' + `${hasController ? 'Controller' : ''} ${hasJoystick ? 'Joystick' : ''} :`
+        , (gps * 20), gamepadHeight + (buttonSize * 2.8));
       ctx.font = `${buttonSize / 2}px Arial`;
       if (_jsg.controllers.length > 0) {
         const c = _jsg.controllers[0];
@@ -255,7 +259,7 @@ function draw() {
           const btnText = Object.keys(c.state.buttons).map((k) => {
             return `${k}:${c.state.buttons[k] ? '1' : '0'}`;
           }).sort().join(' ');
-          buttonY = wrapText(ctx, btnText, (gps * 20), gamepadHeight + (buttonSize * 4), width * 0.8, buttonSize);
+          buttonY = wrapText(ctx, btnText, (gps * 20), gamepadHeight + (buttonSize * 3.5), width * 0.8, buttonSize);
         }
         if (c.state.axes) {
           const axesText = Object.keys(c.state.axes).map((k) => {
@@ -268,7 +272,7 @@ function draw() {
         // console.log('has joysticks', j.state);
         j.state.buttons.forEach((b, idx) => {
           // add space between buttons
-          drawSimpleButton(idx, (idx * buttonSize * 1.2) + (gps * 10), gamepadHeight + (buttonSize * 4), buttonSize, b);
+          drawSimpleButton(idx, (idx * buttonSize * 1.2) + (gps * 8), gamepadHeight + (buttonSize * 4), buttonSize, b);
         });
         ctx.fillStyle = 'white';
         ctx.font = `${buttonSize / 2}px Arial`;

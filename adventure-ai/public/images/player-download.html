@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Player Sprite Sheet Download</title>
+    <style>
+        body {
+            background: #1a1a1a;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        svg {
+            background: black;
+            border: 2px solid #3a3a3a;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Player Sprite Sheet</h1>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 288 128" width="576" height="256">
+            <!-- Background -->
+            <rect width="288" height="128" fill="#000"/>
+            
+            <!-- Define reusable elements -->
+            <defs>
+                <!-- Basic walking frame -->
+                <g id="frame1">
+                    <rect x="8" y="8" width="16" height="16" fill="#00FF00"/>
+                    <rect x="10" y="4" width="12" height="12" fill="#FFFF00"/>
+                </g>
+                
+                <!-- Walking frame 2 -->
+                <g id="frame2">
+                    <rect x="8" y="6" width="16" height="16" fill="#00FF00"/>
+                    <rect x="10" y="2" width="12" height="12" fill="#FFFF00"/>
+                </g>
+                
+                <!-- Walking frame 3 -->
+                <g id="frame3">
+                    <rect x="8" y="8" width="16" height="16" fill="#00FF00"/>
+                    <rect x="10" y="4" width="12" height="12" fill="#FFFF00"/>
+                </g>
+                
+                <!-- Attack frame 1 -->
+                <g id="attack1">
+                    <rect x="8" y="8" width="16" height="16" fill="#00FF00"/>
+                    <rect x="10" y="4" width="12" height="12" fill="#FFFF00"/>
+                    <rect x="24" y="12" width="8" height="2" fill="#FFFFFF"/>
+                </g>
+                
+                <!-- Attack frame 2 -->
+                <g id="attack2">
+                    <rect x="8" y="8" width="16" height="16" fill="#00FF00"/>
+                    <rect x="10" y="4" width="12" height="12" fill="#FFFF00"/>
+                    <rect x="24" y="12" width="12" height="2" fill="#FFFFFF"/>
+                </g>
+                
+                <!-- Attack frame 3 -->
+                <g id="attack3">
+                    <rect x="8" y="8" width="16" height="16" fill="#00FF00"/>
+                    <rect x="10" y="4" width="12" height="12" fill="#FFFF00"/>
+                    <rect x="24" y="12" width="6" height="2" fill="#FFFFFF"/>
+                </g>
+                
+                <!-- Hurt frame -->
+                <g id="hurt">
+                    <rect x="8" y="8" width="16" height="16" fill="#FF0000"/>
+                    <rect x="10" y="4" width="12" height="12" fill="#FFFF00"/>
+                </g>
+            </defs>
+            
+            <!-- Down-facing animations (row 0) -->
+            <g transform="translate(0,0)">
+                <!-- Idle frame -->
+                <g transform="translate(0,0)">
+                    <rect x="8" y="8" width="16" height="16" fill="#00FF00"/>
+                    <rect x="10" y="4" width="12" height="12" fill="#FFFF00"/>
+                    <circle cx="14" cy="8" r="1" fill="#000"/>
+                    <circle cx="18" cy="8" r="1" fill="#000"/>
+                </g>
+                
+                <!-- Walking frames -->
+                <use href="#frame1" transform="translate(32,0)"/>
+                <use href="#frame2" transform="translate(64,0)"/>
+                <use href="#frame3" transform="translate(96,0)"/>
+                
+                <!-- Attack frames -->
+                <use href="#attack1" transform="translate(128,0)"/>
+                <use href="#attack2" transform="translate(160,0)"/>
+                <use href="#attack3" transform="translate(192,0)"/>
+                
+                <!-- Hurt frame -->
+                <use href="#hurt" transform="translate(224,0)"/>
+            </g>
+            
+            <!-- Up-facing animations (row 1) -->
+            <g transform="translate(0,32)">
+                <use href="#frame1"/>
+                <use href="#frame2" transform="translate(32,0)"/>
+                <use href="#frame3" transform="translate(64,0)"/>
+                <use href="#attack1" transform="translate(96,0)"/>
+            </g>
+            
+            <!-- Left-facing animations (row 2) -->
+            <g transform="translate(0,64)">
+                <use href="#frame1"/>
+                <use href="#frame2" transform="translate(32,0)"/>
+                <use href="#frame3" transform="translate(64,0)"/>
+                <use href="#attack1" transform="translate(96,0)"/>
+            </g>
+            
+            <!-- Right-facing animations (row 3) -->
+            <g transform="translate(0,96)">
+                <use href="#frame1"/>
+                <use href="#frame2" transform="translate(32,0)"/>
+                <use href="#frame3" transform="translate(64,0)"/>
+                <use href="#attack1" transform="translate(96,0)"/>
+            </g>
+        </svg>
+        <button onclick="downloadPNG()">Download player.png</button>
+    </div>
+
+    <script>
+        function downloadPNG() {
+            const svg = document.querySelector('svg');
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas size to match sprite sheet dimensions
+            canvas.width = 288;
+            canvas.height = 128;
+            
+            // Create image from SVG
+            const img = new Image();
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+            const url = URL.createObjectURL(svgBlob);
+            
+            img.onload = function() {
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                const link = document.createElement('a');
+                link.download = 'player.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                URL.revokeObjectURL(url);
+            };
+            
+            img.src = url;
+        }
+    </script>
+</body>
+</html>

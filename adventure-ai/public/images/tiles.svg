@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 32">
+  <!-- Background -->
+  <rect width="160" height="32" fill="#000" />
+  
+  <!-- Wall Tile (index 0) -->
+  <g transform="translate(0,0)">
+    <rect width="32" height="32" fill="#7C7C7C"/>
+    <!-- Brick pattern -->
+    <rect x="4" y="0" width="24" height="8" fill="#666666"/>
+    <rect x="0" y="8" width="28" height="8" fill="#666666"/>
+    <rect x="8" y="16" width="24" height="8" fill="#666666"/>
+    <rect x="0" y="24" width="32" height="8" fill="#666666"/>
+  </g>
+  
+  <!-- Door Tile (index 1) -->
+  <g transform="translate(32,0)">
+    <rect width="32" height="32" fill="#7C7C7C"/>
+    <rect x="4" y="4" width="24" height="28" fill="#FFFF00"/>
+    <circle cx="24" cy="16" r="2" fill="#000"/>
+  </g>
+  
+  <!-- Bush Tile (index 2) -->
+  <g transform="translate(64,0)">
+    <rect width="32" height="32" fill="#00FF00"/>
+    <!-- Bush texture -->
+    <circle cx="8" cy="8" r="4" fill="#009900"/>
+    <circle cx="20" cy="12" r="6" fill="#009900"/>
+    <circle cx="28" cy="20" r="4" fill="#009900"/>
+    <circle cx="12" cy="24" r="5" fill="#009900"/>
+  </g>
+  
+  <!-- Water Tile (index 3) -->
+  <g transform="translate(96,0)">
+    <rect width="32" height="32" fill="#0000FF"/>
+    <!-- Wave pattern -->
+    <path d="M0 16 Q8 12, 16 16 Q24 20, 32 16" stroke="#00FFFF" fill="none" stroke-width="2"/>
+    <path d="M0 24 Q8 20, 16 24 Q24 28, 32 24" stroke="#00FFFF" fill="none" stroke-width="2"/>
+  </g>
+  
+  <!-- Bridge Tile (index 4) -->
+  <g transform="translate(128,0)">
+    <rect width="32" height="32" fill="#0000FF"/>
+    <!-- Bridge planks -->
+    <rect x="2" y="4" width="28" height="6" fill="#FFFF00"/>
+    <rect x="2" y="14" width="28" height="6" fill="#FFFF00"/>
+    <rect x="2" y="24" width="28" height="6" fill="#FFFF00"/>
+  </g>
+</svg>

@@ -3,6 +3,8 @@ import { Renderer } from './renderer.js';
 import { getInput } from './utils.js';
 
 const canvas = document.getElementById('gameCanvas');
+canvas.width = 640;
+canvas.height = 480;
 const game = new Game();
 const renderer = new Renderer(canvas);
 
