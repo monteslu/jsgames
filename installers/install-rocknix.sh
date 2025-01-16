@@ -11,7 +11,7 @@ my_has() {
 }
 
 my_distro_check() {
-  if [ -f "/usr/bin/rocknix-config.sh" ]; then
+  if [ -f "/usr/bin/rocknix-config" ]; then
     return 0  # True
   else 
     return 1  # False
