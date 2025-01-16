@@ -10,7 +10,7 @@ const ctx = canvas.getContext("2d");
 canvas.width = 640;
 canvas.height = 480;
 
-const pyramidHeight = 25; // params.get('pyramidHeight') ? parseInt(params.get('pyramidHeight')) : 10;
+const pyramidHeight = 13; // params.get('pyramidHeight') ? parseInt(params.get('pyramidHeight')) : 10;
 const pixelsPerMeter = 6.75;
 const subStepCount = 4;
 
@@ -155,6 +155,7 @@ function drawProfile(stepDuration, profile) {
 }
 
 let handle;
+let canRun = false;
 function loop(prevMs) {
   const nowMs = window.performance.now();
   handle = requestAnimationFrame(loop.bind(null, nowMs));
@@ -162,16 +163,20 @@ function loop(prevMs) {
   // const deltaMs = Math.min(nowMs-prevMs, 1000/120);
   const deltaMs = nowMs-prevMs;
   const start = performance.now();
-  b2World_Step(worldId, deltaMs / 1000, subStepCount);
+  if (canRun) {
+    b2World_Step(worldId, deltaMs / 1000, subStepCount);
+  }
   const end = performance.now();
   taskSystem?.ClearTasks();
   ctx.fillStyle = 'black';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-    debugDraw.Draw(worldId);
-
-    const duration = end - start;
-    const profile = b2World_GetProfile(worldId);
-    drawProfile(duration, profile);
+  debugDraw.Draw(worldId);
+  const duration = end - start;
+  const profile = b2World_GetProfile(worldId);
+  drawProfile(duration, profile);
 };
+setTimeout(() => {
+  canRun = true;
+}, 2000);
 
 loop(window.performance.now());
