@@ -21,6 +21,19 @@ NOTE! This script will also delete and replace any existing games in /userdata/r
 - `ssh root@<myDevice>` (default password: linux, default device name : KNULLI or BATOCERA, use IP from device or <myDevice>.local if name fails)
 - `curl -o- https://raw.githubusercontent.com/monteslu/jsgames/main/installers/install-batocera-knulli.sh | bash`
 
+## Installing on [ROCKNIX](https://rocknix.org/)
+
+These are meant to be used with the [jsgamelauncher](https://github.com/monteslu/jsgamelauncher). Install that first using the curl command and then use a similar curl command to install these games.
+
+NOTE! You need to run the 'Update Gamelists' Emulation Station option to get the game to show up.<br>
+NOTE! This script assumes your roms are stored in /roms on the root device.<br>
+NOTE! We need to do more testing on a device we a secondary SD card to get this to work in those situations.<br>
+NOTE! This script will also delete and replace any existing games in /roms/jsgames that have matching names.<br>
+
+- Make sure wifi is turned on for your device or you are otherwise connected to the internet
+- `ssh root@<myDevice>` (default password: rocknix, default device name is the chipset, for example H700 or SD856 . . look it up on the network screen) or use IP from device or <myDevice>.local if name fails)
+- `curl -o- https://raw.githubusercontent.com/monteslu/jsgames/main/installers/install-rocknix.sh | bash`
+
 ## Installing on [muOS](https://muos.dev/)
 
 Coming soon! According to [joyrider3774](https://www.reddit.com/user/joyrider3774/) on this [thread](https://www.reddit.com/r/ANBERNIC/comments/1hsyv9n/comment/m5e2zsy/?context=3) all we need to do is install the GNU versions of ls and tar so that the curl command for installing nvm works.
