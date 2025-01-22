@@ -90,16 +90,27 @@ if my_distro_check; then
   cd ~/jsgames-main
   for dir in *; do
     if [ -d "/roms/jsgames/$dir" ]; then
-        echo "Deleting existing $dir game from /roms/jsgames"
+        my_echo "=> Deleting existing $dir game from /roms/jsgames"
         rm -rf /roms/jsgames/$dir
     else
-        echo "Copying $dir game to /roms/jsgames"
+        my_echo "=> Copying $dir game to /roms/jsgames"
     fi
 
   done
   cd ~
   mv jsgames-main/* /roms/jsgames/
   rm -r jsgames-main
+
+  cd /roms/jsgames/
+  for dir in *; do
+    if [ -f "/roms/jsgames//$dir/package.json" ]; then
+        my_echo "=> package.json exists! Need to npm install on $dir" 
+        cd /roms/jsgames/$dir
+        npm install
+    else
+        my_echo "=> Note: No package.json on $dir so skipping npm install"
+    fi
+  done
 
   my_echo "=> INSTALL SUCCESSFUL!"
   cd ~
