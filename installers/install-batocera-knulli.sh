@@ -108,7 +108,7 @@ if my_distro_check; then
     if [ -f "/userdata/roms/jsgames/$dir/package.json" ]; then
         my_echo "=> package.json exists! Need to npm install on $dir" 
         cd /userdata/roms/jsgames/$dir
-        npm install
+        npm install --omit=dev
     else
         my_echo "=> Note: No package.json on $dir so skipping npm install"
     fi
