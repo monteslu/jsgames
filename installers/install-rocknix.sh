@@ -92,9 +92,6 @@ if my_distro_check; then
   nvm use 22
   cd ~/jsgames-main
   for dir in *; do
-    if [ "$dir" = "installers" ]; then
-      continue
-    fi
     if [ -d "/roms/jsgames/$dir" ]; then
         my_echo "=> Deleting existing $dir game from /roms/jsgames"
         rm -rf /roms/jsgames/$dir
@@ -109,6 +106,9 @@ if my_distro_check; then
 
   cd /roms/jsgames/
   for dir in *; do
+    if [ "$dir" = "installers" ]; then
+      continue
+    fi
     if [ -f "/roms/jsgames//$dir/package.json" ]; then
         my_echo "=> package.json exists! Need to npm install on $dir" 
         cd /roms/jsgames/$dir
