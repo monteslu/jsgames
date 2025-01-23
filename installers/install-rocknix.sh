@@ -72,6 +72,7 @@ if [ -d "$HOME/jsgames-main" ]; then
 fi
 
 my_echo "=> Downloading jsgames"
+source 
 curl -o newmygames.zip -L https://github.com/monteslu/jsgames/archive/refs/heads/main.zip
 unzip newmygames.zip
 
@@ -87,19 +88,35 @@ if my_distro_check; then
     mkdir /roms/jsgames
   fi
 
+  source ~/.bash_profile
+  nvm use 22
   cd ~/jsgames-main
   for dir in *; do
     if [ -d "/roms/jsgames/$dir" ]; then
-        echo "Deleting existing $dir game from /roms/jsgames"
+        my_echo "=> Deleting existing $dir game from /roms/jsgames"
         rm -rf /roms/jsgames/$dir
     else
-        echo "Copying $dir game to /roms/jsgames"
+        my_echo "=> Copying $dir game to /roms/jsgames"
     fi
 
   done
   cd ~
   mv jsgames-main/* /roms/jsgames/
   rm -r jsgames-main
+
+  cd /roms/jsgames/
+  for dir in *; do
+    if [ "$dir" = "installers" ]; then
+      continue
+    fi
+    if [ -f "/roms/jsgames//$dir/package.json" ]; then
+        my_echo "=> package.json exists! Need to npm install on $dir" 
+        cd /roms/jsgames/$dir
+        npm install --omit=dev
+    else
+        my_echo "=> Note: No package.json on $dir so skipping npm install"
+    fi
+  done
 
   my_echo "=> INSTALL SUCCESSFUL!"
   cd ~
