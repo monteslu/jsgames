@@ -72,6 +72,7 @@ if [ -d "$HOME/jsgames-main" ]; then
 fi
 
 my_echo "=> Downloading jsgames"
+source 
 curl -o newmygames.zip -L https://github.com/monteslu/jsgames/archive/refs/heads/main.zip
 unzip newmygames.zip
 
@@ -87,8 +88,13 @@ if my_distro_check; then
     mkdir /roms/jsgames
   fi
 
+  source ~/.bash_profile
+  nvm use 22
   cd ~/jsgames-main
   for dir in *; do
+    if [ "$dir" = "installers" ]; then
+      continue
+    fi
     if [ -d "/roms/jsgames/$dir" ]; then
         my_echo "=> Deleting existing $dir game from /roms/jsgames"
         rm -rf /roms/jsgames/$dir

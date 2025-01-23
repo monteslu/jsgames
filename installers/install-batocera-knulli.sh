@@ -105,6 +105,9 @@ if my_distro_check; then
 
   cd /userdata/roms/jsgames
   for dir in *; do
+    if [ "$dir" = "installers" ]; then
+      continue
+    fi
     if [ -f "/userdata/roms/jsgames/$dir/package.json" ]; then
         my_echo "=> package.json exists! Need to npm install on $dir" 
         cd /userdata/roms/jsgames/$dir
