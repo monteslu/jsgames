@@ -1,45 +1,27 @@
-import sdl from '@kmamal/sdl'
-const TWO_PI = 2 * Math.PI
+// Create an audio context
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
-const playbackInstance = sdl.audio.openDevice({ type: 'playback' });
+// Function to play a tone
+export default function playTone(frequency = 440, duration = 1) {
+  // Create an oscillator node
+  const oscillator = audioContext.createOscillator();
 
+  // Set the type of waveform (sine, square, sawtooth, triangle)
+  oscillator.type = 'sine';
 
-const {
-	channels,
-	frequency,
-	bytesPerSample,
-	minSampleValue,
-	maxSampleValue,
-	zeroSampleValue,
-} = playbackInstance
-const range = maxSampleValue - minSampleValue
-const amplitude = range / 2
+  // Set the frequency of the tone
+  oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
 
-const sineAmplitude = 0.3 * amplitude
-const sineNote = 440
-const sinePeriod = 1 / sineNote
+  // Create a gain node for volume control
+  const gainNode = audioContext.createGain();
 
-const duration = 0.2
-const numFrames = duration * frequency
-const numSamples = numFrames * channels
-const numBytes = numSamples * bytesPerSample
-const buffer = Buffer.alloc(numBytes)
+  // Connect the oscillator to the gain node, and the gain node to the destination
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
 
-let offset = 0
-for (let i = 0; i < numFrames; i++) {
-	const time = i / frequency
-	const angle = time / sinePeriod * TWO_PI
-	const sample = zeroSampleValue + Math.sin(angle) * sineAmplitude
-	for (let j = 0; j < channels; j++) {
-		offset = playbackInstance.writeSample(buffer, sample, offset)
-	}
+  // Start the oscillator
+  oscillator.start();
+
+  // Stop the oscillator after the duration
+  oscillator.stop(audioContext.currentTime + duration);
 }
-
-
-
-function play() {
-  playbackInstance.enqueue(buffer);
-  playbackInstance.play()
-}
-
-export default play;

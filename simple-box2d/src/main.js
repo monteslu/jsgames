@@ -4,8 +4,7 @@ import { getInput } from './utils.js';
 
 console.log('box2d-wasm', Box2DFactory);
 
-const Box2DFactory_ = Box2DFactory;
-Box2DFactory_().then(box2D => {
+Box2DFactory().then(box2D => {
   const {
     b2_dynamicBody,
     b2BodyDef,
@@ -35,7 +34,7 @@ Box2DFactory_().then(box2D => {
     speed: 5, // meters per second
   };
 
-  const pixelsPerMeter = Math.round(canvas.width / 20);
+  const pixelsPerMeter = Math.round(canvas.height / 15);
   const cameraOffsetMetres = {
     x: 0,
     y: 0

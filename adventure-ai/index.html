@@ -32,7 +32,7 @@
 </head>
 <body>
   <!-- Internal aspect ratio 4:3 -->
-  <canvas id="gameCanvas" width="640" height="480"></canvas>
+  <canvas id="gameCanvas" width="640" height="480" style="display: none;"></canvas>
   <script>
     const canvas = document.querySelectorAll('canvas')[0];
     const ctx = canvas.getContext("2d");
@@ -61,6 +61,18 @@
     window.addEventListener("resize", resizeCanvas);
     resizeCanvas(); // Initial resize
   </script>
-  <script src="./src/main.js" type="module"></script>
+  <button id="startButton">Start</button>
+  <script>
+    const startButton = document.getElementById('startButton');
+    startButton.addEventListener('click', () => {
+      console.log('Start button clicked');
+      import('./src/main.js').then(module => {
+        // module.default();
+        startButton.style.display = 'none';
+        canvas.style.display = '';
+      });
+    });
+  </script>
+  
 </body>
 </html>

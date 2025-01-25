@@ -1,7 +1,7 @@
 {
-  "name": "nodered-jsgames",
+  "name": "modern",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "main.js",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -11,9 +11,6 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@hsync/node-red-hsync": "^0.6.1",
-    "express": "^4.21.2",
-    "node-red": "^4.0.5",
-    "node-red-contrib-jsgame": "^1.1.0"
+    "box2d3-wasm": "^3.8.0"
   }
 }

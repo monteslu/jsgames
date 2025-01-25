@@ -1,7 +1,6 @@
 
 let playerColor = 'yellow';
-// import { loadImage } from '@napi-rs/canvas';
-import beep from './sound.js';
+import playTone from './sound.js';
 
 
 let btns = Array(17).fill(0).map((b) => {
@@ -13,13 +12,13 @@ const { requestAnimationFrame, localStorage } = globalThis;
 console.log('requestAnimationFrame def1', requestAnimationFrame);
 
 
-const loadImage2 = (url) => {
-  console.log('loadImage2', url);
+const loadImage = (url) => {
+  console.log('loadImage', url);
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = (loaded) => {
       console.log('img loaded', loaded);
-      resolve(loaded);
+      resolve(img);
     };
     img.onerror = (error) => {
       console.error('img error', error);
@@ -70,7 +69,7 @@ const update = (millis) => {
     if (btns[1] && btns[1].pressed) {
       if (!sounded) {
         console.log('sound');
-        beep();
+        playTone();
         sounded = true;
       }
     } else if (btns[1] && !btns[1].pressed){
@@ -112,9 +111,9 @@ function gameLoop() {
 async function launch() {
   try {
     console.log('start');
-    tuxImg = await loadImage2('./tux64.png');
+    tuxImg = await loadImage('./tux64.png');
     console.log('tuxImg', tuxImg);
-    jsImg = await loadImage2('/js64.png');
+    jsImg = await loadImage('/js64.png');
     console.log('jsImg', jsImg);
     console.log('localStorage', localStorage);
     localStorage.clear();
