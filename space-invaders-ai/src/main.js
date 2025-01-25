@@ -165,7 +165,7 @@ function draw(deltaTime) {
     // Draw score
     ctx.fillStyle = CONSTANTS.COLORS.SCORE;
     const scoreFontSize = getScreenUnit(CONSTANTS.UI_SETTINGS.SCORE_FONT_SIZE_PERCENT, 'height');
-    ctx.font = `${scoreFontSize}px monospace`;
+    ctx.font = `${scoreFontSize}px SMB`;
     ctx.fillText(
         `SCORE: ${gameState.getScore()}`,
         getScreenUnit(CONSTANTS.UI_SETTINGS.SCORE_X_PERCENT),
@@ -182,9 +182,9 @@ function draw(deltaTime) {
     
     // Draw game over screen
     if (gameState.isGameOver()) {
-        ctx.fillStyle = CONSTANTS.COLORS.TEXT;
+        ctx.fillStyle = CONSTANTS.COLORS.END_TEXT;
         const gameOverSize = getScreenUnit(CONSTANTS.UI_SETTINGS.GAME_OVER_FONT_SIZE_PERCENT, 'height');
-        ctx.font = `${gameOverSize}px monospace`;
+        ctx.font = `${gameOverSize}px SMB`;
         const gameOverText = 'GAME OVER';
         const textMetrics = ctx.measureText(gameOverText);
         ctx.fillText(
@@ -193,7 +193,7 @@ function draw(deltaTime) {
             height / 2
         );
         
-        ctx.font = `${scoreFontSize}px monospace`;
+        ctx.font = `${scoreFontSize}px SMB`;
         const restartText = 'Press START button to restart';
         const restartMetrics = ctx.measureText(restartText);
         ctx.fillText(
@@ -242,6 +242,11 @@ async function initGame() {
         enemyLaserSound = await loadSound('sounds/enemylaser.mp3');
         explosionSound = await loadSound('sounds/explosion.mp3');
         gameOverSound = await loadSound('sounds/game-over.mp3');
+
+
+        const font = new FontFace('SMB', 'url(/fonts/smb.ttf)');
+        const loadedFont = await font.load();
+        document.fonts.add(loadedFont);
         
         // Load images
         playerImg = await loadImage('images/player.png');
