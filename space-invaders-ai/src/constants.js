@@ -52,6 +52,7 @@ export const COLORS = {
     ENEMY_BULLET: '#FF0000',
     ENEMY_BULLET_2: '#FFFF00',
     TEXT: '#FFFFFF',
+    END_TEXT: 'yellow',
     SCORE: '#FFFFFF',
     LIVES: '#00FF00',
     GROUND: '#33FF33'
