@@ -1,5 +1,6 @@
 // gameRenderer.js
 import { STATUS_BAR, COLORS, GAME_STATES, SPRITE_CONFIG, TILE_TYPES } from './constants.js';
+import { drawLoadingScreen } from './utils.js';
 
 export class GameRenderer {
   constructor(canvas, resources) {
@@ -25,6 +26,10 @@ export class GameRenderer {
   }
 
   draw({ gameState, player, worldManager, combatSystem, transitionManager }) {
+    if (!this.resources.isComplete()) {
+      drawLoadingScreen(this.ctx, this.resources.getPercentComplete());
+      return;
+    }
     // Get current screen and its background color
     const currentScreen = worldManager.getCurrentScreen();
     // console.log('currentScreen', currentScreen);

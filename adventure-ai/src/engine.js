@@ -42,10 +42,9 @@ export class GameEngine {
     this.resources.addSound('item', 'sounds/item.mp3');
     this.resources.addSound('hurt', 'sounds/hurt.mp3');
     this.resources.addSound('tada', 'sounds/tada.mp3');
+    this.currentState = this.GAME_STATES.LOADING;
     
-    return this.resources.load().then(() => {
-      this.currentState = this.GAME_STATES.PLAYING;
-    });
+    return this.resources.load();
   }
 
   update(deltaTime) {
@@ -89,6 +88,12 @@ export class GameEngine {
   draw() {
     this.ctx.fillStyle = 'black';
     this.ctx.fillRect(0, 0, this.width, this.height);
+    console.log('this.resources.isComplete()', this.resources.isComplete(), this.currentState);
+    if (!this.resources.isComplete()) {
+
+      this.drawLoading();
+      return;
+    }
     
     switch (this.currentState) {
       case this.GAME_STATES.LOADING:

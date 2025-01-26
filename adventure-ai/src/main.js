@@ -36,20 +36,6 @@ async function loadAssets() {
     // Generate sprite sheets
     await spriteManager.generateSprites();
     
-    // Add generated sprite sheets to resources
-    // resources.addImage('tiles', spriteManager.getTileSheet());
-    // resources.addImage('player', spriteManager.getPlayerSheet());
-    // resources.addImage('items', spriteManager.getItemSheet());
-    
-    // Add sound effects
-    resources.addSound('sword', 'sounds/sword.mp3');
-    resources.addSound('item', 'sounds/item.mp3');
-    resources.addSound('hurt', 'sounds/hurt.mp3');
-    resources.addSound('death', 'sounds/sad-trumpet.mp3');  // Add death sound
-    
-    // Wait for all resources to load
-    await resources.load();
-    
     // Create game instance
     game = new Game(canvas, resources);
     

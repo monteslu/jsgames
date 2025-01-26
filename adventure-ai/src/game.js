@@ -22,7 +22,7 @@ export class Game extends GameEngine {
   }
 
   async init() {
-    await super.init();
+    super.init();
     this.worldManager.loadWorld(WORLD_DATA);
     this.player = new Player(10, 6, this.resources, this.combatSystem, this.worldManager);
     this.lastTime = performance.now();
