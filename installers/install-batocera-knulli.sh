@@ -74,6 +74,7 @@ if [ -d "$HOME/jsgames-main" ]; then
 fi
 
 my_echo "=> Downloading jsgames"
+source ~/.bash_profile
 curl -o newmygames.zip -L https://github.com/monteslu/jsgames/archive/refs/heads/main.zip
 unzip newmygames.zip
 
@@ -89,6 +90,8 @@ if my_distro_check; then
     mkdir /userdata/roms/jsgames
   fi
 
+  source ~/.bash_profile
+  nvm use 22
   cd ~/jsgames-main
   for dir in *; do
     if [ -d "/userdata/roms/jsgames/$dir" ]; then
