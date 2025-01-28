@@ -3,6 +3,8 @@ import { Boss } from './boss.js';
 import Cloud from './cloud.js';
 import getInput from './input.js';
 import { loadSound, playSound } from './sfx.js';
+const SHIP_ROTATION = 45; // Degrees - adjust this to try different angles
+
 const canvas = document.getElementById('gameCanvas');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
