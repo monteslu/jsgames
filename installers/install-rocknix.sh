@@ -72,7 +72,7 @@ if [ -d "$HOME/jsgames-main" ]; then
 fi
 
 my_echo "=> Downloading jsgames"
-source 
+source ~/.bash_profile
 curl -o newmygames.zip -L https://github.com/monteslu/jsgames/archive/refs/heads/main.zip
 unzip newmygames.zip
 
