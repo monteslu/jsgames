@@ -103,9 +103,9 @@ function drawPlayerShip(x, y, width, height) {
   const centerX = x + width * 0.4;
   const centerY = y + height * 0.54;
   ctx.translate(centerX, centerY);
-  ctx.rotate(3 * Math.PI / 180); // 3 degrees in radians
+  //ctx.rotate(5 * Math.PI); // 3 degrees in radians
   ctx.translate(-centerX, -centerY);
-  
+
   ctx.font = `${height * 0.8}px NotoEmoji`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
