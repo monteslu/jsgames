@@ -24,10 +24,6 @@ let biggerExplosionSound = null;
 // After canvas creation, add:
 const particles = new ParticleSystem(canvas);
 
-const font = new FontFace('NotoColorEmoji', 'url(NotoColorEmoji.ttf)');
-const loadedFont = await font.load();
-document.fonts.add(loadedFont);
-
 // Scale factors relative to canvas size
 const SCALE = {
   SHIP_WIDTH: width * 0.04, // 4% of screen width
@@ -101,38 +97,35 @@ function drawPlayerShip(x, y, width, height) {
   }[player.facing];
 
   // Main fuselage
-  ctx.beginPath();
-  ctx.moveTo(x + width * 0.9, y + height * 0.5); // Nose
-  ctx.lineTo(x + width * 0.7, y + height * 0.4); // Top of fuselage
-  ctx.lineTo(x + width * 0.3, y + height * 0.4);
-  ctx.lineTo(x + width * 0.3, y + height * 0.6); // Bottom of fuselage
-  ctx.lineTo(x + width * 0.7, y + height * 0.6);
-  ctx.closePath();
-  ctx.fillStyle = '#00ff00';
-  ctx.fill();
-  ctx.strokeStyle = '#fff';
-  ctx.lineWidth = SCALE.SHIP_LINE_WIDTH;
-  ctx.stroke();
+
+  //
+  ctx.font = `${height * 0.8}px NotoEmoji`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#fff';
+  // ctx.fillText('🚀', x + width * 0.4, y + height * 0.54);
+  ctx.fillText('🚀', x + width, y + height);
 
   // Forward-swept wings - now more horizontal
-  ctx.beginPath();
-  ctx.moveTo(x + width * 0.7, y + height * 0.45); // Top wing join
-  ctx.lineTo(x + width * 0.5, y + height * 0.35 + wingTilt); // Top wing tip
-  ctx.lineTo(x + width * 0.3, y + height * 0.4 + wingTilt); // Top wing back
-  ctx.moveTo(x + width * 0.7, y + height * 0.55); // Bottom wing join
-  ctx.lineTo(x + width * 0.5, y + height * 0.65 + wingTilt); // Bottom wing tip
-  ctx.lineTo(x + width * 0.3, y + height * 0.6 + wingTilt); // Bottom wing back
-  ctx.strokeStyle = '#fff';
-  ctx.lineWidth = SCALE.SHIP_LINE_WIDTH;
-  ctx.stroke();
+
+  // ctx.beginPath();
+  // ctx.moveTo(x + width * 0.7, y + height * 0.45); // Top wing join
+  // ctx.lineTo(x + width * 0.5, y + height * 0.35 + wingTilt); // Top wing tip
+  // ctx.lineTo(x + width * 0.3, y + height * 0.4 + wingTilt); // Top wing back
+  // ctx.moveTo(x + width * 0.7, y + height * 0.55); // Bottom wing join
+  // ctx.lineTo(x + width * 0.5, y + height * 0.65 + wingTilt); // Bottom wing tip
+  // ctx.lineTo(x + width * 0.3, y + height * 0.6 + wingTilt); // Bottom wing back
+  // ctx.strokeStyle = '#fff';
+  // ctx.lineWidth = SCALE.SHIP_LINE_WIDTH;
+  // ctx.stroke();
 
   // Engine glow
-  ctx.beginPath();
-  ctx.moveTo(x + width * 0.3, y + height * 0.4);
-  ctx.lineTo(x + width * 0.1, y + height * 0.5);
-  ctx.lineTo(x + width * 0.3, y + height * 0.6);
-  ctx.fillStyle = '#0ff';
-  ctx.fill();
+  // ctx.beginPath();
+  // ctx.moveTo(x + width * 0.3, y + height * 0.4);
+  // ctx.lineTo(x + width * 0.1, y + height * 0.5);
+  // ctx.lineTo(x + width * 0.3, y + height * 0.6);
+  // ctx.fillStyle = '#0ff';
+  // ctx.fill();
 
   ctx.restore();
 }
@@ -574,6 +567,19 @@ async function startGame() {
     console.error('Error loading sounds:', error);
   }
   console.log('LOAD SOUNDS took', performance.now() - start, 'ms');
+
+  start = performance.now();
+
+  const assetfont = new FontFace('NotoEmoji', 'url(NotoEmoji-Bold.ttf)');
+  const loadedAssetFont = await assetfont.load();
+  document.fonts.add(loadedAssetFont);
+
+  const font = new FontFace('NotoColorEmoji', 'url(NotoColorEmoji.ttf)');
+  const loadedFont = await font.load();
+  document.fonts.add(loadedFont);
+
+  console.log('LOAD FONTS took', performance.now() - start, 'ms');
+
   let lastTime = 0;
   const maxElapsedTime = 100;
 
