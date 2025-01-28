@@ -1,15 +1,15 @@
-import { ParticleSystem } from "./particles.js";
-import { Boss } from "./boss.js";
-import Cloud from "./cloud.js";
-import getInput from "./input.js";
-import { loadSound, playSound } from "./sfx.js";
-const canvas = document.getElementById("gameCanvas");
+import { ParticleSystem } from './particles.js';
+import { Boss } from './boss.js';
+import Cloud from './cloud.js';
+import getInput from './input.js';
+import { loadSound, playSound } from './sfx.js';
+const canvas = document.getElementById('gameCanvas');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 const { width, height } = canvas;
-const ctx = canvas.getContext("2d");
+const ctx = canvas.getContext('2d');
 
-canvas.addEventListener("click", () => {
+canvas.addEventListener('click', () => {
   canvas.requestFullscreen();
 });
 
@@ -23,6 +23,10 @@ let biggerExplosionSound = null;
 
 // After canvas creation, add:
 const particles = new ParticleSystem(canvas);
+
+const font = new FontFace('NotoColorEmoji', 'url(NotoColorEmoji.ttf)');
+const loadedFont = await font.load();
+document.fonts.add(loadedFont);
 
 // Scale factors relative to canvas size
 const SCALE = {
@@ -104,9 +108,9 @@ function drawPlayerShip(x, y, width, height) {
   ctx.lineTo(x + width * 0.3, y + height * 0.6); // Bottom of fuselage
   ctx.lineTo(x + width * 0.7, y + height * 0.6);
   ctx.closePath();
-  ctx.fillStyle = "#00ff00";
+  ctx.fillStyle = '#00ff00';
   ctx.fill();
-  ctx.strokeStyle = "#fff";
+  ctx.strokeStyle = '#fff';
   ctx.lineWidth = SCALE.SHIP_LINE_WIDTH;
   ctx.stroke();
 
@@ -118,7 +122,7 @@ function drawPlayerShip(x, y, width, height) {
   ctx.moveTo(x + width * 0.7, y + height * 0.55); // Bottom wing join
   ctx.lineTo(x + width * 0.5, y + height * 0.65 + wingTilt); // Bottom wing tip
   ctx.lineTo(x + width * 0.3, y + height * 0.6 + wingTilt); // Bottom wing back
-  ctx.strokeStyle = "#fff";
+  ctx.strokeStyle = '#fff';
   ctx.lineWidth = SCALE.SHIP_LINE_WIDTH;
   ctx.stroke();
 
@@ -127,13 +131,13 @@ function drawPlayerShip(x, y, width, height) {
   ctx.moveTo(x + width * 0.3, y + height * 0.4);
   ctx.lineTo(x + width * 0.1, y + height * 0.5);
   ctx.lineTo(x + width * 0.3, y + height * 0.6);
-  ctx.fillStyle = "#0ff";
+  ctx.fillStyle = '#0ff';
   ctx.fill();
 
   ctx.restore();
 }
 
-function drawEnemyShip(x, y, width, height, color = "#ff0000") {
+function drawEnemyShip(x, y, width, height, color = '#ff0000') {
   ctx.save();
   ctx.beginPath();
   ctx.moveTo(x + width * 0.9, y + height * 0.5);
@@ -143,16 +147,16 @@ function drawEnemyShip(x, y, width, height, color = "#ff0000") {
   ctx.closePath();
   ctx.fillStyle = color;
   ctx.fill();
-  ctx.strokeStyle = "#fff";
+  ctx.strokeStyle = '#fff';
   ctx.lineWidth = Math.max(1, width * 0.05);
   ctx.stroke();
 
   ctx.beginPath();
   const coreColor =
     {
-      "#ff0000": "#f00",
-      "#ffff00": "#ff0",
-      "#0000ff": "#00f",
+      '#ff0000': '#f00',
+      '#ffff00': '#ff0',
+      '#0000ff': '#00f',
     }[color] || color;
   ctx.arc(x + width * 0.4, y + height * 0.5, height * 0.2, 0, Math.PI * 2);
   ctx.fillStyle = coreColor;
@@ -162,53 +166,35 @@ function drawEnemyShip(x, y, width, height, color = "#ff0000") {
 
 function drawScore() {
   ctx.save();
-  ctx.fillStyle = "#fff";
+  ctx.fillStyle = '#fff';
   ctx.font = `${SCALE.SCORE_SIZE}px Arial`;
-  ctx.textAlign = "left";
-  ctx.textBaseline = "top";
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
 
   if (score <= 0) {
-    ctx.fillStyle = "#f00";
+    ctx.fillStyle = '#f00';
   } else if (score === maxScore) {
-    ctx.fillStyle = "#0f0";
+    ctx.fillStyle = '#0f0';
   }
   // Draw current score
   ctx.fillText(`Score: ${score}`, SCALE.SCORE_PADDING, SCALE.SCORE_PADDING);
 
-  ctx.fillStyle = "#fff";
+  ctx.fillStyle = '#fff';
 
   // Draw max score
-  ctx.fillText(
-    `Max: ${maxScore}`,
-    SCALE.SCORE_PADDING + width * 0.35,
-    SCALE.SCORE_PADDING
-  );
+  ctx.fillText(`Max: ${maxScore}`, SCALE.SCORE_PADDING + width * 0.35, SCALE.SCORE_PADDING);
 
   const spanwedThisLevel = shipsSpawned % shipsPerLevel;
   const percentComplete = spanwedThisLevel / shipsPerLevel;
-  ctx.fillText(
-    `Level: ${bossLevel}`,
-    SCALE.SCORE_PADDING + width * 0.85,
-    SCALE.SCORE_PADDING
-  );
-  ctx.strokeStyle = "#000";
+  ctx.fillText(`Level: ${bossLevel}`, SCALE.SCORE_PADDING + width * 0.85, SCALE.SCORE_PADDING);
+  ctx.strokeStyle = '#000';
   const boxWidth = width / 6;
   const boxHeight = SCALE.SCORE_SIZE * 0.2;
-  ctx.fillStyle = "#fff";
+  ctx.fillStyle = '#fff';
   const scoreY = SCALE.SCORE_PADDING + SCALE.SCORE_SIZE * 1.2;
   ctx.lineWidth = SCALE.SHIP_LINE_WIDTH;
-  ctx.fillRect(
-    SCALE.SCORE_PADDING + width * 0.8,
-    scoreY,
-    boxWidth * percentComplete,
-    boxHeight
-  );
-  ctx.strokeRect(
-    SCALE.SCORE_PADDING + width * 0.8,
-    scoreY,
-    boxWidth,
-    boxHeight
-  );
+  ctx.fillRect(SCALE.SCORE_PADDING + width * 0.8, scoreY, boxWidth * percentComplete, boxHeight);
+  ctx.strokeRect(SCALE.SCORE_PADDING + width * 0.8, scoreY, boxWidth, boxHeight);
 
   // Draw speed multipliers (moved down a bit)
   // const smallerFont = SCALE.SCORE_SIZE * 0.6;
@@ -250,18 +236,11 @@ function resizeCanvas() {
   }
 }
 
-window.addEventListener("resize", resizeCanvas);
+window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
 function detectCollision(a, b) {
-  return (
-    a &&
-    b &&
-    a.x < b.x + b.width &&
-    a.x + a.width > b.x &&
-    a.y < b.y + b.height &&
-    a.y + a.height > b.y
-  );
+  return a && b && a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y;
 }
 
 function spawnEnemy() {
@@ -287,11 +266,11 @@ function spawnEnemy() {
     const random = Math.random();
     let type;
     if (random < 0.4) {
-      type = "normal";
+      type = 'normal';
     } else if (random < 0.8) {
-      type = "sine";
+      type = 'sine';
     } else {
-      type = "blue";
+      type = 'blue';
     }
 
     const baseSpeed = SCALE.ENEMY_SPEED;
@@ -301,20 +280,16 @@ function spawnEnemy() {
       blue: speedMultiplierBlue,
     }[type];
 
-    const isBlue = type === "blue";
-    const shipWidth = isBlue
-      ? SCALE.SHIP_WIDTH * SCALE.BLUE_SHIP_SCALE
-      : SCALE.SHIP_WIDTH;
-    const shipHeight = isBlue
-      ? SCALE.SHIP_HEIGHT * SCALE.BLUE_SHIP_SCALE
-      : SCALE.SHIP_HEIGHT;
+    const isBlue = type === 'blue';
+    const shipWidth = isBlue ? SCALE.SHIP_WIDTH * SCALE.BLUE_SHIP_SCALE : SCALE.SHIP_WIDTH;
+    const shipHeight = isBlue ? SCALE.SHIP_HEIGHT * SCALE.BLUE_SHIP_SCALE : SCALE.SHIP_HEIGHT;
 
     const enemy = {
       x: width + shipWidth,
       y: Math.random() * (height - shipHeight),
       width: shipWidth,
       height: shipHeight,
-      speed: baseSpeed * (type === "sine" ? 0.7 : 1) * speedMultiplier,
+      speed: baseSpeed * (type === 'sine' ? 0.7 : 1) * speedMultiplier,
       type: type,
       startY: 0,
       angle: 0,
@@ -327,7 +302,7 @@ function spawnEnemy() {
       amplitudes: isBlue ? [height * 0.1, height * 0.05, height * 0.025] : null,
     };
 
-    if (type === "sine" || type === "blue") {
+    if (type === 'sine' || type === 'blue') {
       enemy.startY = enemy.y;
     }
 
@@ -346,10 +321,7 @@ function update(elapsed) {
 
   if (Math.abs(p1.LEFT_STICK_X) > 0.2) {
     if (p1.LEFT_STICK_X > 0) {
-      player.x = Math.min(
-        width - player.width,
-        player.x + player.speed * p1.LEFT_STICK_X
-      );
+      player.x = Math.min(width - player.width, player.x + player.speed * p1.LEFT_STICK_X);
     } else {
       player.x = Math.max(0, player.x + player.speed * p1.LEFT_STICK_X);
     }
@@ -364,29 +336,23 @@ function update(elapsed) {
   if (Math.abs(p1.LEFT_STICK_Y) > 0.2) {
     if (p1.LEFT_STICK_Y < 0) {
       player.y = Math.max(0, player.y + player.speed * p1.LEFT_STICK_Y);
-      player.facing = "down";
+      player.facing = 'down';
     } else {
-      player.y = Math.min(
-        height - player.height,
-        player.y + player.speed * p1.LEFT_STICK_Y
-      );
-      player.facing = "up";
+      player.y = Math.min(height - player.height, player.y + player.speed * p1.LEFT_STICK_Y);
+      player.facing = 'up';
     }
   } else {
-    player.facing = "neutral";
+    player.facing = 'neutral';
     if (p1.DPAD_UP.pressed) {
       player.y = Math.max(0, player.y - player.speed);
-      player.facing = "up";
+      player.facing = 'up';
     } else if (p1.DPAD_DOWN.pressed) {
       player.y = Math.min(height - player.height, player.y + player.speed);
-      player.facing = "down";
+      player.facing = 'down';
     }
   }
 
-  if (
-    p1.BUTTON_SOUTH.pressed &&
-    Date.now() - player.lastShot > player.shootDelay
-  ) {
+  if (p1.BUTTON_SOUTH.pressed && Date.now() - player.lastShot > player.shootDelay) {
     player.bullets.push({
       x: player.x + player.width,
       y: player.y + player.height / 2,
@@ -414,29 +380,25 @@ function update(elapsed) {
       if (detectCollision(bullet, enemies[j])) {
         const enemy = enemies[j];
         const enemyColor = {
-          normal: "#ff0000",
-          sine: "#ffff00",
-          blue: "#0000ff",
+          normal: '#ff0000',
+          sine: '#ffff00',
+          blue: '#0000ff',
         }[enemy.type];
 
         // Create explosion at enemy's center
-        particles.createExplosion(
-          enemy.x + enemy.width / 2,
-          enemy.y + enemy.height / 2,
-          enemyColor
-        );
+        particles.createExplosion(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, enemyColor);
         playSound(shipExplosion);
 
         // Rest of the collision handling...
-        if (enemy.type === "normal") {
+        if (enemy.type === 'normal') {
           speedMultiplierNormal += 0.05;
-        } else if (enemy.type === "sine") {
+        } else if (enemy.type === 'sine') {
           speedMultiplierSine += 0.06;
-        } else if (enemy.type === "blue") {
+        } else if (enemy.type === 'blue') {
           speedMultiplierBlue += 0.07;
         }
 
-        score += enemy.type === "blue" ? 50 : enemy.type === "sine" ? 15 : 10;
+        score += enemy.type === 'blue' ? 50 : enemy.type === 'sine' ? 15 : 10;
         maxScore = Math.max(maxScore, score);
         enemies.splice(j, 1);
         player.bullets.splice(i, 1);
@@ -451,29 +413,20 @@ function update(elapsed) {
     if (detectCollision(player, enemy)) {
       // Create explosion at collision point
       const enemyColor = {
-        normal: "#ff0000",
-        sine: "#ffff00",
-        blue: "#0000ff",
+        normal: '#ff0000',
+        sine: '#ffff00',
+        blue: '#0000ff',
       }[enemy.type];
 
-      particles.createExplosion(
-        enemy.x + enemy.width / 2,
-        enemy.y + enemy.height / 2,
-        enemyColor
-      );
-      particles.createExplosion(
-        player.x + player.width / 2,
-        player.y + player.height / 2,
-        "green",
-        5
-      );
+      particles.createExplosion(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, enemyColor);
+      particles.createExplosion(player.x + player.width / 2, player.y + player.height / 2, 'green', 5);
       playSound(biggerExplosionSound);
       // Rest of the collision handling...
-      if (enemy.type === "normal") {
+      if (enemy.type === 'normal') {
         speedMultiplierNormal += 0.05;
-      } else if (enemy.type === "sine") {
+      } else if (enemy.type === 'sine') {
         speedMultiplierSine += 0.06;
-      } else if (enemy.type === "blue") {
+      } else if (enemy.type === 'blue') {
         speedMultiplierBlue += 0.07;
       }
 
@@ -495,20 +448,14 @@ function update(elapsed) {
     const enemy = enemies[i];
     enemy.x -= enemy.speed;
 
-    if (enemy.type === "sine") {
+    if (enemy.type === 'sine') {
       enemy.angle += enemy.speed * 0.05;
       enemy.y = enemy.startY + Math.sin(enemy.angle) * enemy.amplitude;
-    } else if (enemy.type === "blue") {
+    } else if (enemy.type === 'blue') {
       // Update all three angles at different rates
-      enemy.angles = enemy.angles.map(
-        (angle, idx) => angle + enemy.speed * 0.05 * enemy.frequencies[idx]
-      );
+      enemy.angles = enemy.angles.map((angle, idx) => angle + enemy.speed * 0.05 * enemy.frequencies[idx]);
       // Combine three sine waves for complex motion
-      enemy.y =
-        enemy.startY +
-        Math.sin(enemy.angles[0]) * enemy.amplitudes[0] +
-        Math.sin(enemy.angles[1]) * enemy.amplitudes[1] +
-        Math.sin(enemy.angles[2]) * enemy.amplitudes[2];
+      enemy.y = enemy.startY + Math.sin(enemy.angles[0]) * enemy.amplitudes[0] + Math.sin(enemy.angles[1]) * enemy.amplitudes[1] + Math.sin(enemy.angles[2]) * enemy.amplitudes[2];
     }
 
     if (enemy.x + enemy.width < 0) {
@@ -533,12 +480,7 @@ function update(elapsed) {
         maxScore = Math.max(maxScore, score);
         bossBullets.splice(i, 1);
         playSound(biggerExplosionSound);
-        particles.createExplosion(
-          player.x + player.width / 2,
-          player.y + player.height / 2,
-          "green",
-          10
-        );
+        particles.createExplosion(player.x + player.width / 2, player.y + player.height / 2, 'green', 10);
       }
     }
 
@@ -553,22 +495,10 @@ function update(elapsed) {
           particles.createBossExplosion(centerX, centerY);
 
           // Additional bursts at key points of the boss
-          particles.createBossExplosion(
-            boss.x + boss.width * 0.3,
-            boss.y + boss.height * 0.3
-          );
-          particles.createBossExplosion(
-            boss.x + boss.width * 0.3,
-            boss.y + boss.height * 0.7
-          );
-          particles.createBossExplosion(
-            boss.x + boss.width * 0.7,
-            boss.y + boss.height * 0.3
-          );
-          particles.createBossExplosion(
-            boss.x + boss.width * 0.7,
-            boss.y + boss.height * 0.7
-          );
+          particles.createBossExplosion(boss.x + boss.width * 0.3, boss.y + boss.height * 0.3);
+          particles.createBossExplosion(boss.x + boss.width * 0.3, boss.y + boss.height * 0.7);
+          particles.createBossExplosion(boss.x + boss.width * 0.7, boss.y + boss.height * 0.3);
+          particles.createBossExplosion(boss.x + boss.width * 0.7, boss.y + boss.height * 0.7);
 
           playSound(biggerExplosionSound);
           playSound(bossExplosionSound);
@@ -578,12 +508,7 @@ function update(elapsed) {
           boss = null;
           bossLevel++;
         }
-        particles.createExplosion(
-          player.bullets[i].x + player.bullets[i].width / 2,
-          player.bullets[i].y + player.bullets[i].height / 2,
-          "#f00",
-          5
-        );
+        particles.createExplosion(player.bullets[i].x + player.bullets[i].width / 2, player.bullets[i].y + player.bullets[i].height / 2, '#f00', 5);
         player.bullets.splice(i, 1);
       }
     }
@@ -591,7 +516,7 @@ function update(elapsed) {
 }
 
 function draw() {
-  ctx.fillStyle = "#223755";
+  ctx.fillStyle = '#223755';
   ctx.fillRect(0, 0, width, height);
 
   clouds.forEach((layer) => {
@@ -600,16 +525,16 @@ function draw() {
 
   drawPlayerShip(player.x, player.y, player.width, player.height);
 
-  ctx.fillStyle = "#ffff00";
+  ctx.fillStyle = '#ffff00';
   for (const bullet of player.bullets) {
     ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
   }
 
   for (const enemy of enemies) {
     const color = {
-      normal: "#ff0000",
-      sine: "#ffff00",
-      blue: "#0000ff",
+      normal: '#ff0000',
+      sine: '#ffff00',
+      blue: '#0000ff',
     }[enemy.type];
 
     drawEnemyShip(enemy.x, enemy.y, enemy.width, enemy.height, color);
@@ -629,13 +554,13 @@ async function startGame() {
   let start = performance.now();
   try {
     const allSounds = await Promise.all([
-      loadSound("explosion_ship"),
-      loadSound("laser"),
-      loadSound("powerDown"),
-      loadSound("scream"),
-      loadSound("bigger_explosion"),
-      loadSound("boss_laser"),
-      loadSound("big_explosion"),
+      loadSound('explosion_ship'),
+      loadSound('laser'),
+      loadSound('powerDown'),
+      loadSound('scream'),
+      loadSound('bigger_explosion'),
+      loadSound('boss_laser'),
+      loadSound('big_explosion'),
     ]);
 
     shipExplosion = allSounds[0];
@@ -646,9 +571,9 @@ async function startGame() {
     bossLaserSound = allSounds[5];
     bigExplosionSound = allSounds[6];
   } catch (error) {
-    console.error("Error loading sounds:", error);
+    console.error('Error loading sounds:', error);
   }
-  console.log("LOAD SOUNDS took", performance.now() - start, "ms");
+  console.log('LOAD SOUNDS took', performance.now() - start, 'ms');
   let lastTime = 0;
   const maxElapsedTime = 100;
 
