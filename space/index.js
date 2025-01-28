@@ -102,9 +102,9 @@ function drawPlayerShip(x, y, width, height) {
   ctx.font = `${height * 0.8}px NotoEmoji`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillStyle = '#fff';
-  // ctx.fillText('🚀', x + width * 0.4, y + height * 0.54);
-  ctx.fillText('🚀', x + width, y + height);
+  ctx.fillStyle = '#f00';
+  ctx.fillText('🚀', x + width * 0.4, y + height * 0.54);
+  // ctx.fillText('🚀', x + width, y + height);
 
   // Forward-swept wings - now more horizontal
 
