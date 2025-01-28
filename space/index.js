@@ -5,6 +5,11 @@ import getInput from './input.js';
 import { loadSound, playSound } from './sfx.js';
 const SHIP_ROTATION = 45; // Degrees - adjust this to try different angles
 
+// • 0 (no rotation)
+// • 45 (diagonal)
+// • 90 (vertical)
+// • -45 (opposite diagonal)
+
 const canvas = document.getElementById('gameCanvas');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
@@ -105,13 +110,13 @@ function drawPlayerShip(x, y, width, height) {
   const centerX = x + width * 0.4;
   const centerY = y + height * 0.54;
   ctx.translate(centerX, centerY);
-  ctx.rotate(SHIP_ROTATION * Math.PI / 180); // Convert degrees to radians
+  ctx.rotate((SHIP_ROTATION * Math.PI) / 180); // Convert degrees to radians
   ctx.translate(-centerX, -centerY);
 
-  ctx.font = `${height * 0.8}px NotoEmoji`;
+  ctx.font = `${height * 0.9}px NotoEmoji`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillStyle = '#f00';
+  ctx.fillStyle = '#fff';
   ctx.fillText('🚀', centerX, centerY);
   // ctx.fillText('🚀', x + width, y + height);
 
