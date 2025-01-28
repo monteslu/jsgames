@@ -99,11 +99,18 @@ function drawPlayerShip(x, y, width, height) {
   // Main fuselage
 
   //
+  // Set up rotation
+  const centerX = x + width * 0.4;
+  const centerY = y + height * 0.54;
+  ctx.translate(centerX, centerY);
+  ctx.rotate(3 * Math.PI / 180); // 3 degrees in radians
+  ctx.translate(-centerX, -centerY);
+  
   ctx.font = `${height * 0.8}px NotoEmoji`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillStyle = '#f00';
-  ctx.fillText('🚀', x + width * 0.4, y + height * 0.54);
+  ctx.fillText('🚀', centerX, centerY);
   // ctx.fillText('🚀', x + width, y + height);
 
   // Forward-swept wings - now more horizontal
