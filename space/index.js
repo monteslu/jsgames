@@ -296,7 +296,7 @@ function spawnEnemy() {
       y: Math.random() * (height - shipHeight),
       width: shipWidth,
       height: shipHeight,
-      speed: (baseSpeed/16.67) * (type === 'sine' ? 0.7 : 1) * speedMultiplier, // Normalize to 60fps
+      speed: (baseSpeed/3) * (type === 'sine' ? 0.7 : 1) * speedMultiplier, // Normalize to 60fps
       type: type,
       startY: 0,
       angle: 0,
@@ -453,7 +453,7 @@ function update(elapsed) {
 
   for (let i = enemies.length - 1; i >= 0; i--) {
     const enemy = enemies[i];
-    enemy.x -= (enemy.speed/16.67) * elapsed; // Normalize to 60fps
+    enemy.x -= (enemy.speed/3) * elapsed; // Normalize to 60fps
 
     if (enemy.type === 'sine') {
       enemy.angle += enemy.speed * 0.05;
