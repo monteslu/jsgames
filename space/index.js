@@ -328,7 +328,7 @@ function update(elapsed) {
 
   if (Math.abs(p1.LEFT_STICK_X) > 0.2) {
     if (p1.LEFT_STICK_X > 0) {
-      player.x = Math.min(width - player.width, player.x + player.speed * p1.LEFT_STICK_X);
+      player.x = Math.min(width - player.width, player.x + (player.speed/16.67) * elapsed * p1.LEFT_STICK_X);
     } else {
       player.x = Math.max(0, player.x + player.speed * p1.LEFT_STICK_X);
     }
@@ -376,7 +376,7 @@ function update(elapsed) {
 
   for (let i = player.bullets.length - 1; i >= 0; i--) {
     const bullet = player.bullets[i];
-    bullet.x += bullet.speed;
+    bullet.x += (bullet.speed/16.67) * elapsed; // Normalize to 60fps
 
     if (bullet.x > width) {
       player.bullets.splice(i, 1);
@@ -453,7 +453,7 @@ function update(elapsed) {
 
   for (let i = enemies.length - 1; i >= 0; i--) {
     const enemy = enemies[i];
-    enemy.x -= enemy.speed;
+    enemy.x -= (enemy.speed/16.67) * elapsed; // Normalize to 60fps
 
     if (enemy.type === 'sine') {
       enemy.angle += enemy.speed * 0.05;
@@ -594,23 +594,31 @@ async function startGame() {
 
   console.log('LOAD FONTS took', performance.now() - start, 'ms');
 
-  let lastTime = 0;
-  const maxElapsedTime = 100;
+  let lastTime = performance.now();
+  const FIXED_TIMESTEP = 1000/60; // Target 60 FPS
+  let accumulator = 0;
 
-  function gameLoop() {
-    let elapsed = Date.now() - lastTime;
-    lastTime = Date.now();
-
-    if (elapsed > maxElapsedTime) {
-      elapsed = maxElapsedTime;
+  function gameLoop(currentTime) {
+    const frameTime = currentTime - lastTime;
+    lastTime = currentTime;
+    
+    // Prevent spiral of death with max frame time
+    accumulator += Math.min(frameTime, 250);
+    
+    // Update game logic in fixed time steps
+    while (accumulator >= FIXED_TIMESTEP) {
+      update(FIXED_TIMESTEP);
+      accumulator -= FIXED_TIMESTEP;
     }
-    update(elapsed);
-    draw();
+    
+    // Render with interpolation
+    const alpha = accumulator / FIXED_TIMESTEP;
+    draw(alpha);
 
     requestAnimationFrame(gameLoop);
   }
 
-  // Start the game loop immediately
+  // Start the game loop with current time
   requestAnimationFrame(gameLoop);
 }
 
