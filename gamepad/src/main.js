@@ -170,6 +170,11 @@ function draw() {
       if (dbGuid.length === 32) {
         guidText += ' ' + dbGuid.slice(0, 8) + ' ' + dbGuid.slice(8, 16) + ' ' + dbGuid.slice(16, 24) + ' ' + dbGuid.slice(24, 32);
       }
+      if (p1.gp._jsMap.dbMatch.fromDB) {
+        guidText += ' fromDB: ' + p1.gp._jsMap.dbMatch.fromDB;
+      } else if (p1.gp._jsMap.dbMatch.fromAdditional) {
+        guidText += ' fromDB: additional';
+      }
     }
     wrapText(ctx, p1.name + guidText, gamepadWidth, buttonSize, width / 2, buttonSize);
     if (p1.BUTTON_SOUTH.pressed) {
