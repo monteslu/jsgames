@@ -8,7 +8,7 @@ export async function loadSound(url) {
   if (!audioContext) {
     audioContext = new AudioContext();
   }
-  const soundBuffer = await fetch(url).then(res => res.arrayBuffer());
+  const soundBuffer = await fetch(url).then((res) => res.arrayBuffer());
 
   const audioBuffer = await audioContext.decodeAudioData(soundBuffer);
   return audioBuffer;
@@ -23,7 +23,7 @@ export function playSound(audioBuffer, loop = false) {
   }
   const bufferSource = audioContext.createBufferSource();
   bufferSource.buffer = audioBuffer;
-  
+
   bufferSource.connect(audioContext.destination);
   if (loop) {
     bufferSource.loop = true;
@@ -45,7 +45,7 @@ export function loadImage(src) {
   });
 }
 
-export function createReourceLoader() {
+export function createResourceLoader() {
   return {
     imgCount: 0,
     soundCount: 0,
@@ -67,7 +67,7 @@ export function createReourceLoader() {
     },
     addSound(name, src) {
       this.soundCount++;
-      const promise = loadSound(src).then((sound) => {  
+      const promise = loadSound(src).then((sound) => {
         this.sounds[name] = sound;
         this.soundLoadedCount++;
         return sound;
@@ -91,8 +91,8 @@ export function createReourceLoader() {
       this.sounds = {};
       this.imagePromises = [];
       this.soundPromises = [];
-    }
-  }
+    },
+  };
 }
 
 export function drawLoadingScreen(ctx, percentComplete, backgroundColor = 'black', foregroundColor = 'white') {
@@ -115,7 +115,6 @@ export function drawLoadingScreen(ctx, percentComplete, backgroundColor = 'black
   ctx.strokeRect(width / 2 - loadingBarWidth / 2, height / 2 - loadingBarHeight / 2 + fontSize, loadingBarWidth, loadingBarHeight);
 }
 
-
 function getDefaultBtn() {
   return {
     pressed: false,
@@ -134,7 +133,6 @@ window.addEventListener('keyup', (e) => {
   keys[e.key].pressed = false;
   keys[e.key].value = 0;
 });
-
 
 // normalizes input from a gamepad or keyboard
 // if there's a gamepad, player 1 is the gamead and player 2 is the keyboard
@@ -181,7 +179,7 @@ export function getInput() {
     DPAD_RIGHT: keys['ArrowRight'] || getDefaultBtn(),
     BUTTON_SOUTH: keys['z'] || getDefaultBtn(),
     BUTTON_EAST: keys['x'] || getDefaultBtn(),
-    BUTTON_WEST: keys['a'] || getDefaultBtn(), 
+    BUTTON_WEST: keys['a'] || getDefaultBtn(),
     BUTTON_NORTH: keys['s'] || getDefaultBtn(),
     LEFT_SHOULDER: keys['q'] || getDefaultBtn(),
     RIGHT_SHOULDER: keys['r'] || getDefaultBtn(),
@@ -196,6 +194,6 @@ export function getInput() {
     LEFT_STICK_Y: 0,
     RIGHT_STICK_X: 0,
     RIGHT_STICK_Y: 0,
-  })
+  });
   return players;
 }
