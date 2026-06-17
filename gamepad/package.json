@@ -1,14 +1,17 @@
 {
-  "name": "simple-vite",
+  "name": "gamepad",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "pack": "vite build"
   },
   "devDependencies": {
-    "vite": "^6.0.5"
-  }
+    "vite": "^8.0.16",
+    "fflate": "^0.8.3"
+  },
+  "main": "dist/gamepad.js"
 }

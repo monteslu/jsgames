@@ -1,16 +1,22 @@
 {
-  "name": "mygame",
+  "name": "tuxgame",
   "version": "1.0.0",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "http-server ."
+    "dev": "vite",
+    "build": "vite build",
+    "pack": "vite build",
+    "preview": "vite preview"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
-    "http-server": "^14.1.1"
-  }
+    "http-server": "^14.1.1",
+    "fflate": "^0.8.3",
+    "vite": "^8.0.16"
+  },
+  "main": "dist/tuxgame.js"
 }

@@ -52,8 +52,19 @@ export function start(Box2DFactory) {
 
     const statsLevel = 1; //params.get('stats') || 2;
 
-    if(true) { //params.get('threading') === '1') {
-      taskSystem = new TaskSystem(navigator.hardwareConcurrency);
+    // Use the threaded world only when a pthread-capable build is loaded AND
+    // worker pthreads can actually run. The "deluxe" box2d3 build has a real
+    // TaskSystem thread pool (browser w/ crossOriginIsolated, or node/libnode);
+    // the "compat" build also EXPORTS TaskSystem but calling it aborts the wasm
+    // (no thread pool) — so a try/catch is no good (abort kills the instance).
+    // The host signals which build it loaded via globalThis.__JSGAME_NO_THREADS
+    // (the jsgame compat entry sets it); default is threaded (browser).
+    const noThreads = typeof globalThis !== 'undefined' && globalThis.__JSGAME_NO_THREADS;
+    const threads = (typeof navigator !== 'undefined' && navigator.hardwareConcurrency) || 4;
+    const canThread = !noThreads && typeof SharedArrayBuffer !== 'undefined'
+      && typeof TaskSystem === 'function' && typeof b2CreateThreadedWorld === 'function';
+    if (canThread) {
+      taskSystem = new TaskSystem(threads);
       worldId = b2CreateThreadedWorld(worldDef, taskSystem);
     } else {
       worldId = b2CreateWorld(worldDef);

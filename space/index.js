@@ -2,7 +2,7 @@ import { ParticleSystem } from './particles.js';
 import { Boss } from './boss.js';
 import Cloud from './cloud.js';
 import getInput from './input.js';
-import { loadSound, playSound } from './sfx.js';
+import { loadSound, playSound, loadMusic, startLevelMusic, startBossMusic } from './sfx.js';
 const SHIP_ROTATION = 45; // Degrees - adjust this to try different angles
 
 // • 0 (no rotation)
@@ -18,6 +18,39 @@ const ctx = canvas.getContext('2d');
 
 canvas.addEventListener('click', () => {
   canvas.requestFullscreen();
+});
+
+// --- Menu ---
+const menuOverlay = document.getElementById('menu-overlay');
+let paused = false;
+
+// Key display highlighting
+const allKeyEls = document.querySelectorAll('.key[data-keys]');
+const keyElMap = {};
+allKeyEls.forEach(el => {
+  const k = el.getAttribute('data-keys');
+  keyElMap[k] = el;
+});
+
+window.addEventListener('keydown', (e) => {
+  // Highlight key in menu
+  const el = keyElMap[e.key] || keyElMap[e.key.toLowerCase()];
+  if (el) el.classList.add('active');
+
+  if (e.key === 'm' || e.key === 'M') {
+    paused = true;
+    menuOverlay.classList.add('open');
+  }
+  if (e.key === 'Escape' && menuOverlay.classList.contains('open')) {
+    paused = false;
+    menuOverlay.classList.remove('open');
+    e.preventDefault();
+  }
+});
+
+window.addEventListener('keyup', (e) => {
+  const el = keyElMap[e.key] || keyElMap[e.key.toLowerCase()];
+  if (el) el.classList.remove('active');
 });
 
 let shipExplosion = null;
@@ -267,6 +300,7 @@ function spawnEnemy() {
       });
       window.boss = boss;
       bossActive = true;
+      startBossMusic();
       return;
     }
 
@@ -514,6 +548,7 @@ function update(elapsed) {
           bossActive = false;
           boss = null;
           bossLevel++;
+          startLevelMusic();
         }
         particles.createExplosion(player.bullets[i].x + player.bullets[i].width / 2, player.bullets[i].y + player.bullets[i].height / 2, '#f00', 5);
         player.bullets.splice(i, 1);
@@ -563,7 +598,7 @@ async function startGame() {
     const allSounds = await Promise.all([
       loadSound('explosion_ship'),
       loadSound('laser'),
-      loadSound('powerDown'),
+      loadSound('powerdown'),
       loadSound('scream'),
       loadSound('bigger_explosion'),
       loadSound('boss_laser'),
@@ -581,6 +616,10 @@ async function startGame() {
     console.error('Error loading sounds:', error);
   }
   console.log('LOAD SOUNDS took', performance.now() - start, 'ms');
+
+  // Load and start music
+  await loadMusic();
+  startLevelMusic();
 
   start = performance.now();
 
@@ -602,6 +641,12 @@ async function startGame() {
     const frameTime = currentTime - lastTime;
     lastTime = currentTime;
     
+    // Skip updates when paused
+    if (paused) {
+      requestAnimationFrame(gameLoop);
+      return;
+    }
+
     // Prevent spiral of death with max frame time
     accumulator += Math.min(frameTime, 250);
     

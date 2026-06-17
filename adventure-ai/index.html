@@ -61,18 +61,39 @@
     window.addEventListener("resize", resizeCanvas);
     resizeCanvas(); // Initial resize
   </script>
-  <button id="startButton">Start</button>
+  <div id="startScreen" style="text-align: center; color: #fff; font-family: monospace;">
+    <h1 style="font-size: 32px; color: #FFD700; margin-bottom: 8px;">Crystal Quest</h1>
+    <p style="font-size: 14px; color: #aaa; margin: 4px 0;">Collect 3 Crystals to save the realm!</p>
+    <p style="font-size: 12px; color: #888; margin: 4px 0;">Arrow Keys = Move | Z = Sword | X = Bow | S = Talk | A = Dagger</p>
+    <button id="startButton" style="font-size: 20px; padding: 10px 30px; margin-top: 12px; cursor: pointer; background: #228B22; color: #fff; border: 2px solid #FFD700; font-family: monospace;">Start Adventure</button>
+  </div>
   <script>
     const startButton = document.getElementById('startButton');
     startButton.addEventListener('click', () => {
-      console.log('Start button clicked');
       import('./src/main.js').then(module => {
-        // module.default();
-        startButton.style.display = 'none';
+        document.getElementById('startScreen').style.display = 'none';
         canvas.style.display = '';
       });
     });
   </script>
   
+
+  <script>
+    // jsgame: scale canvas to window (letterbox) + click-to-fullscreen (browser
+    // only; a libretro frontend owns its own window/fullscreen). Picks the first
+    // <canvas> so it works regardless of this game's canvas id.
+    (function () {
+      const canvas = document.querySelector('canvas');
+      if (!canvas) return;
+      function resize() {
+        const ar = canvas.width / canvas.height, ww = innerWidth, wh = innerHeight;
+        if (ww / wh > ar) { canvas.style.width = wh * ar + 'px'; canvas.style.height = wh + 'px'; }
+        else { canvas.style.width = ww + 'px'; canvas.style.height = ww / ar + 'px'; }
+      }
+      addEventListener('resize', resize); resize();
+      canvas.addEventListener('click', () =>
+        document.fullscreenElement ? document.exitFullscreen?.() : canvas.requestFullscreen?.());
+    })();
+  </script>
 </body>
 </html>

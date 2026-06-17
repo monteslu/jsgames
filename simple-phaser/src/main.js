@@ -1,8 +1,6 @@
 import Phaser from 'phaser';
 import { getInput } from './utils.js';
 
-const canvas = document.getElementById('gameCanvas');
-
 let canPlaySound = true;
 
 class Example extends Phaser.Scene
@@ -48,8 +46,7 @@ class Example extends Phaser.Scene
 }
 
 const config = {
-  type: Phaser.CANVAS,
-  canvas,
+  type: Phaser.AUTO,
   width: 640,
   height: 480,
   scene: Example,

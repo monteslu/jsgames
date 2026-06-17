@@ -28,11 +28,85 @@
       img {
         image-rendering: pixelated;
       }
+
+      #menu-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0, 0, 0, 0.85);
+        z-index: 100;
+        display: none;
+        justify-content: center;
+        align-items: center;
+      }
+      #menu-overlay.open {
+        display: flex;
+      }
+      #menu-box {
+        background: #111;
+        border: 2px solid #444;
+        border-radius: 12px;
+        padding: 40px 60px;
+        color: #fff;
+        font-family: Arial, sans-serif;
+        text-align: center;
+        min-width: 300px;
+      }
+      #menu-box h1 {
+        margin: 0 0 20px 0;
+        font-size: 28px;
+        color: #0ff;
+      }
+      #menu-box .controls {
+        text-align: left;
+        font-size: 16px;
+        line-height: 2.2;
+        color: #aaa;
+      }
+      .key {
+        display: inline-block;
+        background: #333;
+        border: 1px solid #555;
+        border-radius: 4px;
+        padding: 2px 10px;
+        font-family: monospace;
+        font-size: 14px;
+        font-weight: bold;
+        color: #fff;
+        min-width: 20px;
+        text-align: center;
+        transition: background 0.1s, border-color 0.1s, color 0.1s;
+      }
+      .key.active {
+        background: #0ff;
+        border-color: #0ff;
+        color: #000;
+      }
+      #menu-box .hint {
+        margin-top: 20px;
+        font-size: 14px;
+        color: #666;
+      }
     </style>
   </head>
   <body>
     <!-- Internal aspect ratio 4:3 -->
     <canvas id="gameCanvas" width="640" height="480"></canvas>
+    <div id="menu-overlay">
+      <div id="menu-box">
+        <h1>SPACE</h1>
+        <div class="controls">
+          <span class="key" data-keys="ArrowUp">&#x2191;</span>
+          <span class="key" data-keys="ArrowDown">&#x2193;</span>
+          <span class="key" data-keys="ArrowLeft">&#x2190;</span>
+          <span class="key" data-keys="ArrowRight">&#x2192;</span> — Move<br>
+          <span class="key" data-keys="z">Z</span> — Shoot<br>
+          <span class="key" data-keys="m">M</span> — Menu<br>
+          <span class="key" data-keys="Escape">Esc</span> — Close Menu<br>
+        </div>
+        <div class="hint">Press Escape to resume</div>
+      </div>
+    </div>
     <script>
       const canvas = document.querySelectorAll('canvas')[0];
       const ctx = canvas.getContext("2d");
@@ -61,5 +135,23 @@
       resizeCanvas(); // Initial resize
     </script>
     <script src="./index.js" type="module"></script>
-  </body>
+  
+  <script>
+    // jsgame: scale canvas to window (letterbox) + click-to-fullscreen (browser
+    // only; a libretro frontend owns its own window/fullscreen). Picks the first
+    // <canvas> so it works regardless of this game's canvas id.
+    (function () {
+      const canvas = document.querySelector('canvas');
+      if (!canvas) return;
+      function resize() {
+        const ar = canvas.width / canvas.height, ww = innerWidth, wh = innerHeight;
+        if (ww / wh > ar) { canvas.style.width = wh * ar + 'px'; canvas.style.height = wh + 'px'; }
+        else { canvas.style.width = ww + 'px'; canvas.style.height = ww / ar + 'px'; }
+      }
+      addEventListener('resize', resize); resize();
+      canvas.addEventListener('click', () =>
+        document.fullscreenElement ? document.exitFullscreen?.() : canvas.requestFullscreen?.());
+    })();
+  </script>
+</body>
 </html>

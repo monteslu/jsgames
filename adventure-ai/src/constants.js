@@ -5,13 +5,21 @@ export const TILE_TYPES = {
   WALL: 'x',
   DOOR: 'd',
   BUSH: 'b',
-  WATER: 'w',  
+  WATER: 'w',
   BRIDGE: '=',
   KEY: 'k',
   SWORD: 's',
   HEART: 'h',
-  BOW: 'B',    
-  ARROW: 'a'
+  BOW: 'B',
+  ARROW: 'a',
+  SAND: '.',
+  LAVA: 'L',
+  CHEST: 'C',
+  GRASS: 'g',
+  TREE: 'T',
+  GRAVE: 'G',
+  CRYSTAL: '*',
+  BIG_HEART: 'H'
 };
 
 export const DIRECTIONS = {
@@ -49,8 +57,13 @@ export const SPRITE_CONFIG = {
       [TILE_TYPES.WALL]: 0,
       [TILE_TYPES.DOOR]: 1,
       [TILE_TYPES.BUSH]: 2,
-      [TILE_TYPES.WATER]: 3,    
-      [TILE_TYPES.BRIDGE]: 4
+      [TILE_TYPES.WATER]: 3,
+      [TILE_TYPES.BRIDGE]: 4,
+      [TILE_TYPES.SAND]: 5,
+      [TILE_TYPES.LAVA]: 6,
+      [TILE_TYPES.GRASS]: 7,
+      [TILE_TYPES.TREE]: 8,
+      [TILE_TYPES.GRAVE]: 9
     }
   },
   items: {
@@ -61,7 +74,10 @@ export const SPRITE_CONFIG = {
       [TILE_TYPES.SWORD]: 1,
       [TILE_TYPES.HEART]: 2,
       [TILE_TYPES.BOW]: 3,
-      [TILE_TYPES.ARROW]: 4
+      [TILE_TYPES.ARROW]: 4,
+      [TILE_TYPES.CHEST]: 5,
+      [TILE_TYPES.CRYSTAL]: 6,
+      [TILE_TYPES.BIG_HEART]: 7
     }
   },
   player: {
@@ -109,7 +125,7 @@ export const SPRITE_CONFIG = {
 export const PLAYER_SPEED = 5.0;
 export const PLAYER_ATTACK_DURATION = 200;
 export const PLAYER_HURT_DURATION = 500;
-export const PLAYER_INVINCIBLE_DURATION = 1000;
+export const PLAYER_INVINCIBLE_DURATION = 8000;
 export const PLAYER_ATTACK_COOLDOWN = 300;
 
 export const PLAYER_STATES = {
@@ -136,8 +152,8 @@ export const STATUS_BAR = {
   weaponSize: 48,
   weaponSpacing: 8,
   miniMap: {
-    screenWidth: 10,    
-    screenHeight: 6,    
+    screenWidth: 10,
+    screenHeight: 6,
     padding: 8
   },
   padding: 8,
@@ -198,6 +214,14 @@ export const COMBAT_CONFIG = {
     range: 6,
     size: 0.3      // Smaller hitbox than arrows
   }
+};
+
+export const NPC_CONFIG = {
+  INTERACT_RANGE: 1.8,
+  BUBBLE_PADDING: 14,
+  BUBBLE_MAX_WIDTH: 460,
+  BUBBLE_SHOW_TIME: 4500,
+  BUBBLE_FADE_TIME: 500
 };
 
 export const DEBUG_CONFIG = {

@@ -2,3 +2,17 @@ node_modules
 package-lock.json
 .DS_Store
 .aider*
+
+# built game output (rebuild with `npm run build`) — applies to all games here
+*/dist/
+*/node_modules/
+*.jsgame
+*/package-lock.json
+
+# copy-wasm output for box2d games (regenerated from node_modules; vendored
+# copies live in public/scripts/ and ARE committed)
+simple-box2d/public/Box2D.wasm
+simple-box2d3/public/Box2D.compat.wasm
+simple-box2d3/public/Box2D.deluxe.wasm
+simple-box2d3/public/Box2D.deluxe.mjs
+simple-box2d/public/Box2D.js

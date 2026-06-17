@@ -62,5 +62,23 @@
     resizeCanvas(); // Initial resize
   </script>
   <script src="./src/main.js" type="module"></script>
+
+  <script>
+    // jsgame: scale canvas to window (letterbox) + click-to-fullscreen (browser
+    // only; a libretro frontend owns its own window/fullscreen). Picks the first
+    // <canvas> so it works regardless of this game's canvas id.
+    (function () {
+      const canvas = document.querySelector('canvas');
+      if (!canvas) return;
+      function resize() {
+        const ar = canvas.width / canvas.height, ww = innerWidth, wh = innerHeight;
+        if (ww / wh > ar) { canvas.style.width = wh * ar + 'px'; canvas.style.height = wh + 'px'; }
+        else { canvas.style.width = ww + 'px'; canvas.style.height = ww / ar + 'px'; }
+      }
+      addEventListener('resize', resize); resize();
+      canvas.addEventListener('click', () =>
+        document.fullscreenElement ? document.exitFullscreen?.() : canvas.requestFullscreen?.());
+    })();
+  </script>
 </body>
 </html>

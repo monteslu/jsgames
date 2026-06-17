@@ -20,7 +20,7 @@ const STATUS_HEIGHT = 96;
 canvas.width = SCREEN_WIDTH * TILE_SIZE;
 canvas.height = SCREEN_HEIGHT * TILE_SIZE + STATUS_HEIGHT;
 
-// Get WebGL context with pixel-perfect rendering
+// Get 2d context with pixel-perfect rendering
 const ctx = canvas.getContext('2d', {
   antialias: false,
   imageSmoothingEnabled: false,
@@ -33,10 +33,18 @@ let game = null;
 // Asset loading
 async function loadAssets() {
   try {
-    // Generate sprite sheets
+    // Generate sprite sheets first
     await spriteManager.generateSprites();
 
-    // Create game instance
+    // Pre-set generated images so engine.init() finds them already loaded
+    resources.images.tiles = spriteManager.getTileSheet();
+    resources.images.player = spriteManager.getPlayerSheet();
+    resources.images.items = spriteManager.getItemSheet();
+    // Mark image counts as already loaded
+    resources.imgCount = 3;
+    resources.imgLoadedCount = 3;
+
+    // Create game instance (engine.init will load sounds and skip image re-loading)
     game = new Game(canvas, resources);
   } catch (error) {
     console.error('Failed to load game assets:', error);

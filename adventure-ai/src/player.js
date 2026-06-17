@@ -1,5 +1,5 @@
 // player.js
-import { PLAYER_STATES, DIRECTIONS, PLAYER_SPEED, PLAYER_ATTACK_DURATION, 
+import { PLAYER_STATES, DIRECTIONS, PLAYER_SPEED, PLAYER_ATTACK_DURATION,
          PLAYER_HURT_DURATION, PLAYER_INVINCIBLE_DURATION, SPRITE_CONFIG, TILE_TYPES } from './constants.js';
 import { playSound } from './utils.js';
 
@@ -25,7 +25,8 @@ export class Player {
       keys: 0,
       sword: false,
       bow: false,
-      arrows: 0
+      arrows: 0,
+      crystals: 0
     };
     
     this.currentFrame = 0;
@@ -41,7 +42,9 @@ export class Player {
     this.attackCooldown = 0;
     this.daggerCooldown = 0;  // Separate cooldown for dagger attacks
     this.knockback = null;
-    this.hitboxSize = 0.6;
+    this.hitboxSize = 0.45;
+    this.width = 0.45;
+    this.height = 0.45;
     this.currentWeapon = 'sword';
   }
 
@@ -328,6 +331,21 @@ export class Player {
         this.heal(1);
         playSound(this.resources.sounds.item);
         break;
+      case TILE_TYPES.CRYSTAL:
+        this.inventory.crystals++;
+        playSound(this.resources.sounds.tada);
+        break;
+      case TILE_TYPES.CHEST:
+        // Chest gives random loot
+        this.inventory.arrows += 5;
+        this.heal(1);
+        playSound(this.resources.sounds.tada);
+        break;
+      case TILE_TYPES.BIG_HEART:
+        this.maxHealth++;
+        this.health = this.maxHealth;
+        playSound(this.resources.sounds.tada);
+        break;
     }
   }
 
@@ -335,15 +353,23 @@ export class Player {
     if (this.isInvincible && Math.floor(this.invincibleTime / 100) % 2 === 0) {
       return;
     }
-    
+
     const sprite = this.resources.images.player;
     const frameConfig = SPRITE_CONFIG.player;
-    const animation = SPRITE_CONFIG.player.animations[this.state];
-    const frame = animation.frames[this.currentFrame];
-    
+
+    // Map state to frame index: 0=idle, 1=walk1, 2=walk2, 3=attack
+    let frame = 0;
+    if (this.state === PLAYER_STATES.ATTACKING) {
+      frame = 3;
+    } else if (this.state === PLAYER_STATES.WALKING) {
+      frame = this.currentFrame % 2 === 0 ? 1 : 2;
+    } else if (this.state === PLAYER_STATES.HURT) {
+      frame = 0; // flash handled by invincibility
+    }
+
     const srcX = frame * frameConfig.frameWidth;
     const srcY = Object.values(DIRECTIONS).indexOf(this.direction) * frameConfig.frameHeight;
-    
+
     // Draw sprite centered on position
     ctx.drawImage(
       sprite,
@@ -361,14 +387,13 @@ export class Player {
     if (this.state === PLAYER_STATES.ATTACKING && this.inventory.sword) {
       const swingProgress = this.stateTime / PLAYER_ATTACK_DURATION;
       const swingAngle = Math.PI * swingProgress;
-      
+
       ctx.save();
       ctx.translate(
         Math.floor(this.x * 32),
         Math.floor(this.y * 32)
       );
-      
-      // Rotate based on direction and swing progress
+
       switch(this.direction) {
         case DIRECTIONS.RIGHT:
           ctx.rotate(swingAngle);
@@ -383,14 +408,13 @@ export class Player {
           ctx.rotate(-Math.PI/2 + swingAngle);
           break;
       }
-      
-      // Draw swing arc
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-      ctx.lineWidth = 2;
+
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+      ctx.lineWidth = 3;
       ctx.beginPath();
-      ctx.arc(0, 0, 20, -Math.PI/4, Math.PI/4);
+      ctx.arc(0, 0, 22, -Math.PI/3, Math.PI/3);
       ctx.stroke();
-      
+
       ctx.restore();
     }
   }

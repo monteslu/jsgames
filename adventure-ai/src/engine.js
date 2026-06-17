@@ -34,16 +34,21 @@ export class GameEngine {
   }
 
   init() {
-    // Load resources
-    this.resources.addImage('tiles', 'images/tiles.png');
-    this.resources.addImage('player', 'images/player.png');
-    this.resources.addImage('items', 'images/items.png');
+    // Only load images if not already provided (spriteManager generates them)
+    if (!this.resources.images.tiles) {
+      this.resources.addImage('tiles', 'images/tiles.png');
+      this.resources.addImage('player', 'images/player.png');
+      this.resources.addImage('items', 'images/items.png');
+    }
     this.resources.addSound('sword', 'sounds/sword.mp3');
     this.resources.addSound('item', 'sounds/item.mp3');
     this.resources.addSound('hurt', 'sounds/hurt.mp3');
     this.resources.addSound('tada', 'sounds/tada.mp3');
+    this.resources.addSound('bow', 'sounds/laser.mp3');
+    this.resources.addSound('hit', 'sounds/hurt.mp3');
+    this.resources.addSound('death', 'sounds/sad-trumpet.mp3');
     this.currentState = this.GAME_STATES.LOADING;
-    
+
     return this.resources.load();
   }
 
@@ -88,9 +93,7 @@ export class GameEngine {
   draw() {
     this.ctx.fillStyle = 'black';
     this.ctx.fillRect(0, 0, this.width, this.height);
-    console.log('this.resources.isComplete()', this.resources.isComplete(), this.currentState);
     if (!this.resources.isComplete()) {
-
       this.drawLoading();
       return;
     }

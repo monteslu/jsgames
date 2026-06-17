@@ -1,0 +1,1 @@
+{ "name": "jsgames-workspace", "private": true, "type": "module", "devDependencies": { "fflate": "^0.8.3" } }

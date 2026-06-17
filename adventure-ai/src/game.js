@@ -24,6 +24,10 @@ export class Game extends GameEngine {
   async init() {
     super.init();
     this.worldManager.loadWorld(WORLD_DATA);
+    // Start in village center (1,0)
+    this.worldManager.currentScreenX = 1;
+    this.worldManager.currentScreenY = 0;
+    this.worldManager.getCurrentScreen().visited = true;
     this.player = new Player(10, 6, this.resources, this.combatSystem, this.worldManager);
     this.lastTime = performance.now();
     this.gameState = GAME_STATES.PLAYING;
@@ -49,21 +53,32 @@ export class Game extends GameEngine {
       const oldX = this.player.x;
       const oldY = this.player.y;
       this.player.update(deltaTime, input);
-      
+
       if (!this.worldManager.isWalkable(this.player.x, this.player.y)) {
         this.player.x = oldX;
         this.player.y = oldY;
       }
-      
+
       this.checkScreenTransitions();
       this.combatSystem.update(deltaTime, this.player, this.worldManager.getEnemies(), this.worldManager);
       this.worldManager.update(deltaTime, this.player);
       this.checkItemCollection();
+      this.checkNPCInteraction(input);
     } else if (this.gameState === GAME_STATES.TRANSITIONING) {
       this.transitionManager.update(deltaTime);
       if (this.transitionManager.isComplete()) {
         this.worldManager.changeScreen(this.transitionManager.direction);
         this.gameState = GAME_STATES.PLAYING;
+      }
+    }
+  }
+
+  checkNPCInteraction(input) {
+    // Interact with NPC on BUTTON_NORTH press (S key / Y button)
+    if (input.BUTTON_NORTH && input.BUTTON_NORTH.pressed) {
+      const npc = this.worldManager.getNearbyNPC(this.player.x, this.player.y);
+      if (npc) {
+        npc.interact();
       }
     }
   }
@@ -83,12 +98,12 @@ export class Game extends GameEngine {
 
   checkItemCollection() {
     const tile = this.worldManager.getTile(
-      Math.floor(this.player.x), 
+      Math.floor(this.player.x),
       Math.floor(this.player.y)
     );
-    
+
     if (this.worldManager.removeItem(
-      Math.floor(this.player.x), 
+      Math.floor(this.player.x),
       Math.floor(this.player.y))
     ) {
       playSound(this.resources.sounds.item);

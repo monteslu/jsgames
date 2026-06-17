@@ -6,13 +6,15 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "pack": "vite build"
   },
   "devDependencies": {
-    "vite": "^6.0.5"
+    "vite": "^8.0.16",
+    "fflate": "^0.8.3"
   },
   "dependencies": {
-    "phaser": "^3.87.0",
-    "phaser3spectorjs": "npm:empty-npm-package@1.0.0"
-  }
+    "phaser": "^3.90.0"
+  },
+  "main": "dist/simple-phaser.js"
 }
